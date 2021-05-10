@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+@using (Html.BeginForm("downloadStockData", "GetStockData"))
+{
+    <div class="form-group">
+        <div class="col-md-offset-1 col-md-11">
+            <input type="submit" value="getStockData" class="btn btn-default" />
+        </div>
+    </div>
+    <br />
+}
+@using (Html.BeginForm("downloadOtcData", "GetStockData"))
+{
+    <div class="form-group">
+        <div class="col-md-offset-1 col-md-11">
+            <input type="submit" value="getOtcData" class="btn btn-default" />
+        </div>
+    </div>
+}
+
+
+

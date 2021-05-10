@@ -1,0 +1,63 @@
+﻿@model IEnumerable<WebStock.Models.stockAvg>
+
+@{
+    ViewBag.Title = "stockStatistics";
+}
+
+<h2>stockStatistics</h2>
+
+<p>
+    @Html.ActionLink("相對價格表","stockStatistics", "stockStatistics", new { }, new {@class= "btn btn-primary btn-lg" })
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.code)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.avgPrice)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.highestPrice)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.lowestPrice)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.avgShares)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.avgTurnover)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.code)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.avgPrice)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.highestPrice)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.lowestPrice)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.avgShares)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.avgTurnover)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.id }) |
+            @Html.ActionLink("Details", "Details", new { id=item.id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.id })
+        </td>
+    </tr>
+}
+
+</table>
