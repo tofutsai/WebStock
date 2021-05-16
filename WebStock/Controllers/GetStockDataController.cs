@@ -14,6 +14,19 @@ namespace WebStock.Controllers
         // GET: GetStockData
         public ActionResult Index()
         {
+            using(var db = new WebStockEntities())
+            {
+                var lastUpdate = db.sysConfig.FirstOrDefault();
+                string stockDate = lastUpdate.stockUpdate.ToString("yyyy-MM-dd");
+                ViewBag.stockLastUpdate = $"Stock Last Update {stockDate}";
+                string otcDate = lastUpdate.otcUpdate.ToString("yyyy-MM-dd");
+                ViewBag.otcLastUpdate = $"Otc Last Update {otcDate}";
+                string nowDate = lastUpdate.nowDate.ToString("yyyy-MM-dd");
+                ViewBag.nowDate = $"Now Last Update {nowDate}";
+                string avgStartDate = lastUpdate.avgStartDate.ToString("yyyy-MM-dd");
+                string avgEndDate = lastUpdate.avgEndDate.ToString("yyyy-MM-dd");
+                ViewBag.avgDate = $"{avgStartDate} ~ {avgEndDate}";
+            }
             return View();
         }
 
@@ -61,5 +74,23 @@ namespace WebStock.Controllers
             return totalmsg;
 
         }
+
+        CommonModel commonModel = new CommonModel();
+
+        [HttpPost]
+        public ActionResult computeStockAvg()
+        {
+            commonModel.stockAvgStatistics();
+            return RedirectToAction("Index", "GetStockData");
+        }
+
+        [HttpPost]
+        public ActionResult computeStockNow()
+        {
+            commonModel.stockNowsStatistics();
+            return RedirectToAction("Index", "GetStockData", new { });
+        }
+
+
     }
 }

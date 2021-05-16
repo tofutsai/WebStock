@@ -41,15 +41,17 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="註冊" class="btn btn-default" />
+                <input type="submit" value="註冊" class="btn btn-success" /> <br /> <br />
+                @Html.ActionLink("登入", "Login", new { }, new { @Class = "btn btn-primary" })
             </div>
+            
         </div>
     </div>
 }
-
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @*@Html.ActionLink("回目錄", "Index", new { }, new { @Class = "btn btn-primary" })*@
 </div>
+
 
 @section Scripts {
     @Scripts.Render("~/bundles/jqueryval")

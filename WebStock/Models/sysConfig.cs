@@ -17,5 +17,8 @@ namespace WebStock.Models
         public int id { get; set; }
         public System.DateTime stockUpdate { get; set; }
         public System.DateTime otcUpdate { get; set; }
+        public System.DateTime nowDate { get; set; }
+        public System.DateTime avgStartDate { get; set; }
+        public System.DateTime avgEndDate { get; set; }
     }
 }

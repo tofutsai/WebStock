@@ -33,14 +33,16 @@
         </div>
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="登入" class="btn btn-default" />
+                <input type="submit" value="登入" class="btn btn-success" /> <br /><br />
+                @Html.ActionLink("註冊", "Register", new { }, new { @Class = "btn btn-primary" })
             </div>
         </div>
     </div>
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @*@Html.ActionLink("回目錄", "Index", new { }, new { @Class = "btn btn-primary" })*@ 
+    
 </div>
 
 @section Scripts {

@@ -11,7 +11,8 @@ namespace WebStock.Controllers
         public ActionResult Index()
         {
             string name = UserInfo.OperName;
-            ViewBag.Message = "Hello " + name;
+            
+            ViewBag.Message = string.IsNullOrEmpty(name)? "" : "Hello " + name;
             return View();
         }
 
