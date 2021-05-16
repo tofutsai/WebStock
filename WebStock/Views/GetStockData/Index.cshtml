@@ -3,25 +3,52 @@
     ViewBag.Title = "Index";
 }
 
-<h2>Index</h2>
+<h2>Download</h2>
 
 @using (Html.BeginForm("downloadStockData", "GetStockData"))
 {
-    <div class="form-group">
-        <div class="col-md-offset-1 col-md-11">
-            <input type="submit" value="getStockData" class="btn btn-default" />
-        </div>
-    </div>
-    <br />
-}
-@using (Html.BeginForm("downloadOtcData", "GetStockData"))
-{
-    <div class="form-group">
-        <div class="col-md-offset-1 col-md-11">
-            <input type="submit" value="getOtcData" class="btn btn-default" />
+    <div class="form-group" style="height:45px;">
+        <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
+            <input type="submit" value="getStockData" class="btn btn-success btn-lg" />
+            &emsp;&emsp;&emsp;&emsp;<span style="font-size:16px">@ViewBag.stockLastUpdate</span>
         </div>
     </div>
 }
 
+@using (Html.BeginForm("downloadOtcData", "GetStockData"))
+{
+    <div class="form-group" style="height:45px;">
+        <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
+            <input type="submit" value="getOtcData" class="btn btn-success btn-lg" />
+            &emsp;&emsp;&emsp;&emsp;&emsp;<span style="font-size:16px">@ViewBag.otcLastUpdate</span>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("computeStockAvg", "GetStockData"))
+{
+    <div class="form-group" style="height:45px;">
+        <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
+            <input type="submit" value="computeStockAvg" class="btn btn-primary btn-lg" />
+            &emsp;&ensp;<span style="font-size:16px">@ViewBag.avgDate</span>
+        </div>
+    </div>
+}
+
+@using (Html.BeginForm("computeStockNow", "GetStockData"))
+{
+    <div class="form-group" style="height:45px;">
+        <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
+            <input type="submit" value="computeStockNow" class="btn btn-primary btn-lg" />
+            &emsp;<span style="font-size:16px">@ViewBag.nowDate</span>
+        </div>
+    </div>
+}
+
+<div class="form-group" style="height:45px;">
+    <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
+        @Html.ActionLink("相對價格表", "sysConfig", new { }, new { @class = "btn btn-info btn-lg" })
+    </div>
+</div>
 
 

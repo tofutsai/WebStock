@@ -1,63 +1,59 @@
-﻿@model IEnumerable<WebStock.Models.stockAvg>
+﻿@model WebStock.ViewModels.stockStatisticsViewModel
 
 @{
     ViewBag.Title = "stockStatistics";
 }
-
-<h2>stockStatistics</h2>
-
+<br />
 <p>
-    @Html.ActionLink("相對價格表","stockStatistics", "stockStatistics", new { }, new {@class= "btn btn-primary btn-lg" })
+    @Html.ActionLink("相對價格表", "stockStatistics", new { }, new {@class = "btn btn-primary btn-lg" })
 </p>
 <table class="table">
     <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.code)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.avgPrice)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.highestPrice)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.lowestPrice)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.avgShares)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.avgTurnover)
-        </th>
-        <th></th>
+        <th>市場別</th>
+        <th>產業類別</th>
+        <th>股票代碼</th>
+        <th>公司名稱</th>
+        <th>交易張數</th>
+        <th>交易金額(百萬)</th>
+        <th>平均高價</th>
+        <th>平均低價</th>
+        <th>目前價格</th>
+        <th>相對位置</th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.code)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.avgPrice)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.highestPrice)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.lowestPrice)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.avgShares)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.avgTurnover)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.id })
-        </td>
-    </tr>
+@foreach (var item in Model.stockSummaryStatistics) {
+<tr>
+    <td>
+        @Html.DisplayFor(model => item.type)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.category)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.code)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.company)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.avgShares)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.avgTurnover)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.highestPrice)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.lowestPrice)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.closePrice)
+    </td>
+    <td>
+        @Html.DisplayFor(model => item.position)
+    </td>
+</tr>
 }
 
 </table>

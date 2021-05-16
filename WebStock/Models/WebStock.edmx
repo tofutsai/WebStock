@@ -103,6 +103,9 @@
           <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="stockUpdate" Type="datetime" Nullable="false" />
           <Property Name="otcUpdate" Type="datetime" Nullable="false" />
+          <Property Name="nowDate" Type="datetime" Nullable="false" />
+          <Property Name="avgStartDate" Type="datetime" Nullable="false" />
+          <Property Name="avgEndDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="sysLog">
           <Key>
@@ -136,8 +139,8 @@
           <EntitySet Name="stockDataTmpOtc" EntityType="WebStockModel.stockDataTmpOtc" />
           <EntitySet Name="stockIndex" EntityType="WebStockModel.stockIndex" />
           <EntitySet Name="stockNow" EntityType="WebStockModel.stockNow" />
-          <EntitySet Name="sysConfig" EntityType="WebStockModel.sysConfig" />
           <EntitySet Name="sysLog" EntityType="WebStockModel.sysLog" />
+          <EntitySet Name="sysConfig" EntityType="WebStockModel.sysConfig" />
         </EntityContainer>
         <EntityType Name="member">
           <Key>
@@ -230,14 +233,6 @@
           <Property Name="position" Type="Double" Nullable="false" />
           <Property Name="dataDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
-        <EntityType Name="sysConfig">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="stockUpdate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="otcUpdate" Type="DateTime" Nullable="false" Precision="3" />
-        </EntityType>
         <EntityType Name="sysLog">
           <Key>
             <PropertyRef Name="id" />
@@ -246,6 +241,17 @@
           <Property Name="type" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
           <Property Name="date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="sysConfig">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="stockUpdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="otcUpdate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="nowDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="avgStartDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="avgEndDate" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -351,21 +357,24 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="sysConfig">
-            <EntityTypeMapping TypeName="WebStockModel.sysConfig">
-              <MappingFragment StoreEntitySet="sysConfig">
-                <ScalarProperty Name="otcUpdate" ColumnName="otcUpdate" />
-                <ScalarProperty Name="stockUpdate" ColumnName="stockUpdate" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="sysLog">
             <EntityTypeMapping TypeName="WebStockModel.sysLog">
               <MappingFragment StoreEntitySet="sysLog">
                 <ScalarProperty Name="message" ColumnName="message" />
                 <ScalarProperty Name="date" ColumnName="date" />
                 <ScalarProperty Name="type" ColumnName="type" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="sysConfig">
+            <EntityTypeMapping TypeName="WebStockModel.sysConfig">
+              <MappingFragment StoreEntitySet="sysConfig">
+                <ScalarProperty Name="avgEndDate" ColumnName="avgEndDate" />
+                <ScalarProperty Name="avgStartDate" ColumnName="avgStartDate" />
+                <ScalarProperty Name="nowDate" ColumnName="nowDate" />
+                <ScalarProperty Name="otcUpdate" ColumnName="otcUpdate" />
+                <ScalarProperty Name="stockUpdate" ColumnName="stockUpdate" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

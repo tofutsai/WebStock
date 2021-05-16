@@ -64,10 +64,10 @@ namespace WebStock.Models
                                 dataDate,
                                 shares,
                                 turnover,
-                                openprice,
-                                heightprice,
-                                lowprice,
-                                closeprice,
+                                openPrice,
+                                highestPrice,
+                                lowestPrice,
+                                closePrice,
                                 spread
                                 )
                                 
@@ -77,10 +77,10 @@ namespace WebStock.Models
                                 b.dataDate,
                                 b.shares,
                                 b.turnover,
-                                b.openprice,
-                                b.heightprice,
-                                b.lowprice,
-                                b.closeprice,
+                                b.openPrice,
+                                b.highestPrice,
+                                b.lowestPrice,
+                                b.closePrice,
                                 b.spread
                                 
                                 from stockIndex a
@@ -168,10 +168,6 @@ namespace WebStock.Models
                         else
                             OtcData.spread = Convert.ToDouble(item[3]);
 
-
-
-
-
                         //寫入DB
                         db.stockDataTmpOtc.Add(OtcData);
                         db.SaveChanges();
@@ -183,10 +179,10 @@ namespace WebStock.Models
                                 dataDate,
                                 shares,
                                 turnover,
-                                openprice,
-                                heightprice,
-                                lowprice,
-                                closeprice,
+                                openPrice,
+                                highestPrice,
+                                lowestPrice,
+                                closePrice,
                                 spread
                                 )
                                 
@@ -196,10 +192,10 @@ namespace WebStock.Models
                                 b.dataDate,
                                 b.shares,
                                 b.turnover,
-                                b.openprice,
-                                b.heightprice,
-                                b.lowprice,
-                                b.closeprice,
+                                b.openPrice,
+                                b.highestPrice,
+                                b.lowestPrice,
+                                b.closePrice,
                                 b.spread
                                 
                                 from stockIndex a

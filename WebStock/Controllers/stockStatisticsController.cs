@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
+using static WebStock.Models.CommonModel;
+using WebStock.ViewModels;
 
 namespace WebStock.Controllers
 {
@@ -19,8 +21,11 @@ namespace WebStock.Controllers
         
         public ActionResult stockStatistics()
         {
-            List<stockAvg> stockAvgs = commonModel.stockAvgStatistics();
-            return View(stockAvgs);
+            List<stockSummaryStatistics> summaryStatistics = commonModel.summaryStatistics();
+            stockStatisticsViewModel stockStatisticsViewModel = new stockStatisticsViewModel();
+            stockStatisticsViewModel.stockSummaryStatistics = summaryStatistics;
+
+            return View(stockStatisticsViewModel);
         }
 
     }

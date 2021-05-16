@@ -32,7 +32,7 @@ namespace WebStock.Models
         public DbSet<stockDataTmpOtc> stockDataTmpOtc { get; set; }
         public DbSet<stockIndex> stockIndex { get; set; }
         public DbSet<stockNow> stockNow { get; set; }
-        public DbSet<sysConfig> sysConfig { get; set; }
         public DbSet<sysLog> sysLog { get; set; }
+        public DbSet<sysConfig> sysConfig { get; set; }
     }
 }
