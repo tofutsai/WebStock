@@ -75,11 +75,12 @@ namespace WebStock.Models
             List<stockStatistics> stockStatistics = new List<stockStatistics>();
             using(var db = new WebStockEntities())
             {
+                var sys = db.sysConfig.FirstOrDefault();
                 string truncatesql = "truncate table stockAvg";
                 db.Database.ExecuteSqlCommand(truncatesql);
                 db.SaveChanges();
-                string sql = @"select s.code,year(dataDate) as dataYear, round(avg(closeprice),2) as avgPrice, MAX(closeprice) as highestPrice, MIN(closeprice) as lowestPrice, round(avg(shares), 2) as avgShares, round(avg(turnover), 2) as avgTurnover 
-                             from stockData s where dataDate between '2016-01-01' and '2020-12-31' group by year(dataDate), s.code order by s.code, dataYear";
+                string sql = $"select s.code,year(dataDate) as dataYear, round(avg(closeprice),2) as avgPrice, MAX(closeprice) as highestPrice, MIN(closeprice) as lowestPrice, round(avg(shares), 2) as avgShares, round(avg(turnover), 2) as avgTurnover " +
+                             $"from stockData s where dataDate between '{sys.avgStartDate.ToShortDateString()}' and '{sys.avgEndDate.ToShortDateString()}' group by year(dataDate), s.code order by s.code, dataYear";
                 stockStatistics = db.Database.SqlQuery<stockStatistics>(sql).ToList();
                 
                 foreach (var item in db.stockIndex.ToList())
@@ -127,7 +128,7 @@ namespace WebStock.Models
             List<stockNowStatistics> stockStatisticsNows = new List<stockNowStatistics>();
             using (var db = new WebStockEntities())
             {
-                string truncatesql = "truncate table stockAvg";
+                string truncatesql = "truncate table stockNow";
                 db.Database.ExecuteSqlCommand(truncatesql);
                 db.SaveChanges();
                 string sql = @"SELECT
@@ -174,6 +175,10 @@ namespace WebStock.Models
                         db.SaveChanges();
                     }
                 }
+                var sysConfig = db.sysConfig.FirstOrDefault();
+                var stocknow = db.stockNow.Where(x => x.id == 1).FirstOrDefault();
+                sysConfig.nowDate = stocknow.dataDate;
+                db.SaveChanges();
             }
             return stockNows;
         }

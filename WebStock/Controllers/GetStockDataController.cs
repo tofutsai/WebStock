@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace WebStock.Controllers
         // GET: GetStockData
         public ActionResult Index()
         {
-            using(var db = new WebStockEntities())
+            using (var db = new WebStockEntities())
             {
                 var lastUpdate = db.sysConfig.FirstOrDefault();
                 string stockDate = lastUpdate.stockUpdate.ToString("yyyy-MM-dd");
@@ -42,7 +43,7 @@ namespace WebStock.Controllers
             {
                 string datetime = date.ToString("yyyy-MM-dd");
                 string msg = await downloadModel.DownloadStock(datetime);
-                totalmsg += msg+"<br/>";
+                totalmsg += msg + "<br/>";
                 DateTime nextdate = date.AddDays(1);
                 int count = sysModel.updatesysConfigstockUpdate(nextdate);
                 date = nextdate;
@@ -88,9 +89,48 @@ namespace WebStock.Controllers
         public ActionResult computeStockNow()
         {
             commonModel.stockNowsStatistics();
-            return RedirectToAction("Index", "GetStockData", new { });
+            return RedirectToAction("Index", "GetStockData");
         }
 
+        public ActionResult sysConfig()
+        {
+            using (var db = new WebStockEntities())
+            {
+                var sysconfig = db.sysConfig.FirstOrDefault();
+                return View(sysconfig);
+            }
 
+        }
+
+        public string sysConfigAjax(sysConfig sys)
+        {
+            string sql = @"UPDATE sysConfig
+                           SET
+                           stockUpdate = @stockUpdate, 
+                           otcUpdate = @otcUpdate, 
+                           nowDate = @nowDate,  
+                           avgStartDate = @avgStartDate,  
+                           avgEndDate = @avgEndDate 
+                           WHERE id = @id;";
+            using (var db = new WebStockEntities())
+            {
+                if (sys != null)
+                {
+                   int res = db.Database.ExecuteSqlCommand(sql,
+                   new SqlParameter("@stockUpdate", sys.stockUpdate),
+                   new SqlParameter("@otcUpdate", sys.otcUpdate),
+                   new SqlParameter("@nowDate", sys.nowDate),
+                   new SqlParameter("@avgStartDate", sys.avgStartDate),
+                   new SqlParameter("@avgEndDate", sys.avgEndDate),
+                   new SqlParameter("@id", sys.id)
+                );
+                    db.SaveChanges();
+                    return "upDate success !";
+                }
+                else
+                    return "upDate error !";
+            }
+
+        }
     }
 }

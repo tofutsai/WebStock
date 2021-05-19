@@ -1,0 +1,95 @@
+﻿@model WebStock.Models.sysConfig
+
+@{
+    ViewBag.Title = "sysConfig";
+}
+
+<h2>sysConfig</h2>
+
+
+@Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.id, new { id = "sysId" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.stockUpdate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(model => model.stockUpdate, "{0:yyyy-MM-dd}", new { type = "date", htmlAttributes = new { id = "stockUpdate", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.stockUpdate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.otcUpdate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(model => model.otcUpdate, "{0:yyyy-MM-dd}", new { type = "date", htmlAttributes = new { id = "otcUpdate", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.otcUpdate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.nowDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(model => model.nowDate, "{0:yyyy-MM-dd}", new { type = "date", htmlAttributes = new { id = "nowDate", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.nowDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.avgStartDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(model => model.avgStartDate, "{0:yyyy-MM-dd}", new { type = "date", htmlAttributes = new { id = "avgStartDate", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.avgStartDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.avgEndDate, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(model => model.avgEndDate, "{0:yyyy-MM-dd}", new { type = "date", htmlAttributes = new { id = "avgEndDate", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.avgEndDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input id="save" type="submit" value="Save" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+<script>
+    $(function () {
+        $("#save").click(function () {
+            let sys = {
+                id : $("#sysId").val(),
+                stockUpdate : $("#stockUpdate").val(),
+                otcUpdate : $("#otcUpdate").val(),
+                nowDate : $("#nowDate").val(),
+                avgStartDate : $("#avgStartDate").val(),
+                avgEndDate : $("#avgEndDate").val(),
+
+            };
+            $.ajax({
+                url: '@Url.Action("sysConfigAjax")',
+                type: 'POST',
+                data: sys,
+                success: function (data) {
+                    alert(data);
+                    window.location.href = "/GetStockData"
+                }
+            })
+
+        })
+    })
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
