@@ -4,12 +4,12 @@
 }
 
 <h2>Download</h2>
-
+<script src="../Scripts/jquery.blockUI.js"></script>
 @using (Html.BeginForm("downloadStockData", "GetStockData"))
 {
     <div class="form-group" style="height:45px;">
         <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
-            <input type="submit" value="getStockData" class="btn btn-success btn-lg" />
+            <input type="submit" value="getStockData" class="btn btn-success btn-lg" onclick="waitUI()" />
             &emsp;&emsp;&emsp;&emsp;<span style="font-size:16px">@ViewBag.stockLastUpdate</span>
         </div>
     </div>
@@ -19,7 +19,7 @@
 {
     <div class="form-group" style="height:45px;">
         <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
-            <input type="submit" value="getOtcData" class="btn btn-success btn-lg" />
+            <input type="submit" value="getOtcData" class="btn btn-success btn-lg" onclick="waitUI()"/>
             &emsp;&emsp;&emsp;&emsp;&emsp;<span style="font-size:16px">@ViewBag.otcLastUpdate</span>
         </div>
     </div>
@@ -29,7 +29,7 @@
 {
     <div class="form-group" style="height:45px;">
         <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
-            <input type="submit" value="computeStockAvg" class="btn btn-primary btn-lg" />
+            <input type="submit" value="computeStockAvg" class="btn btn-primary btn-lg" onclick="waitUI()"/>
             &emsp;&ensp;<span style="font-size:16px">@ViewBag.avgDate</span>
         </div>
     </div>
@@ -39,7 +39,7 @@
 {
     <div class="form-group" style="height:45px;">
         <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
-            <input type="submit" value="computeStockNow" class="btn btn-primary btn-lg" />
+            <input type="submit" value="computeStockNow" class="btn btn-primary btn-lg" onclick="waitUI()"/>
             &emsp;<span style="font-size:16px">@ViewBag.nowDate</span>
         </div>
     </div>
@@ -47,8 +47,25 @@
 
 <div class="form-group" style="height:45px;">
     <div class="col-md-offset-1 col-md-11" style="margin-left: 0px;padding-left: 0px;">
-        @Html.ActionLink("相對價格表", "sysConfig", new { }, new { @class = "btn btn-info btn-lg" })
+        @Html.ActionLink("sysConfig", "sysConfig", new { }, new { @class = "btn btn-info btn-lg" })
     </div>
 </div>
 
+<script>
+    function waitUI() {
+        $.blockUI({
+            message: '<h3>處理中,請稍候...<h3>',
+            css: {
+                border: '3px solid #a00',
+                padding: '15px',
+                color: 'Red'
+            }
+        });
+        
+        setTimeout(function () {
+            $.unblockUI();
+        }, 12000)
+        
+    }
+</script>
 
