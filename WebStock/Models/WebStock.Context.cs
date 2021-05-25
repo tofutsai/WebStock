@@ -34,5 +34,8 @@ namespace WebStock.Models
         public DbSet<stockNow> stockNow { get; set; }
         public DbSet<sysLog> sysLog { get; set; }
         public DbSet<sysConfig> sysConfig { get; set; }
+        public DbSet<stockMemo> stockMemo { get; set; }
+        public DbSet<stockFavorite> stockFavorite { get; set; }
+        public DbSet<stockProfit> stockProfit { get; set; }
     }
 }

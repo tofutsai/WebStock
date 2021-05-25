@@ -1,0 +1,184 @@
+﻿@model WebStock.ViewModels.stockFavoriteViewModel
+
+@{
+    ViewBag.Title = "selfFavorite";
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<style>
+    table th {
+        position: sticky;
+        top: 50px;
+        background-color: #FFE66F;
+    }
+
+    .level-hh {
+        font-weight: bold;
+        color: #AE0000;
+    }
+
+    .level-h {
+        font-weight: bold;
+        color: #FF0000;
+    }
+
+    .level-l {
+        font-weight: bold;
+        color: #00BB00;
+    }
+
+    .level-ll {
+        font-weight: bold;
+        color: #007500;
+    }
+
+    input {
+        border: solid 0px;
+        border-bottom: solid 1px #ccc;
+    }
+</style>
+<br />
+<p>
+    @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-primary " })
+    @Html.ActionLink("自選", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-primary btn-lg" })
+    @Html.ActionLink("庫存損益", "", new { }, new { @class = "btn btn-primary " })
+</p>
+<hr />
+<p>
+    <input id="codeInput" type="text" name="code" value="" placeholder="股票代碼/名稱" style="width:100px;"/>
+    <span onclick="Create()" style="color:blue;cursor:pointer">新增自選</span>
+</p>
+
+<table class="table">
+
+    <tr>
+        <th>市場別</th>
+        <th>產業類別</th>
+        <th>股票代碼</th>
+        <th>公司名稱</th>
+        <th>目前價格</th>
+        <th>相對位置</th>
+        <th>備註</th>
+        <th>自行備註</th>
+        <th></th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.favorites)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.type)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.category)
+            </td>
+            <td>
+                @Html.ActionLink(item.code, "", new { }, new { href = "https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID=" + item.code })
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.company)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.closePrice)
+            </td>
+            <td>
+                @{
+                    if (item.position >= 1)
+                    {
+                        <div class="level-hh">@item.position</div>
+                    }
+                    else if (item.position < 1 && item.position > 0.5)
+                    {
+                        <div class="level-h">@item.position</div>
+                    }
+                    else if (item.position > 0 && item.position <= 0.5)
+                    {
+                        <div class="level-l">@item.position</div>
+                    }
+                    else if (item.position <= 0)
+                    {
+                        <div class="level-ll">@item.position</div>
+                    }
+                }
+            </td>
+            <td>
+            </td>
+            <td style="width:200px;">
+                @{
+                    var db = new WebStock.Models.WebStockEntities();
+                    Model.stockFavorite = db.stockFavorite.Where(x => x.code == item.code && x.operId == Model.user.OperId).FirstOrDefault();
+                    <input id="@item.code" type="text" name="memo" value="@Model.stockFavorite.memo" />
+                }
+
+            </td>
+            <td>
+                <span onclick="updateMemo(@item.code)" style="color:blue; cursor:pointer" title="編輯"><i class="bi bi-file-text-fill" style="font-size:20px;"></i></span>
+                
+            </td>
+            <td>
+                <span onclick="Delete(@item.code)" style="color:red; cursor:pointer;" title="刪除"><i class="bi bi-trash-fill" style="font-size:20px;"></i></span>
+            </td>
+        </tr>
+    }
+</table>
+<script>
+    function Create() {
+        const code = document.getElementById("codeInput").value;
+        var data = { code: code };
+        $.ajax({
+            type: "post",
+            url: "@Url.Action("CreateFavoriteStock")",
+            data: data,
+            dataType: "text",
+            success: function (msg) {
+                alert("回傳訊息: code:" + code + msg);
+                location.reload();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        })
+    }
+    function Delete(code) {
+        var yes = confirm("確定刪除自選:  " + code + " 嗎?");
+        if (yes) {
+            var data = { code: code };
+            $.ajax({
+                type: "post",
+                url: "@Url.Action("DeleteFavoriteStock")",
+                data: data,
+                dataType: "text",
+                success: function (msg) {
+                    alert("回傳訊息: " + msg);
+                    location.reload();
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }
+            })
+        }
+    }
+    function updateMemo(code) {
+        let memo = document.getElementById(code).value;
+        let data = {
+            code: code,
+            memo, memo
+        }
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("updateStockMemo")",
+            data: data,
+            dataType: "text",
+            success: function (msg) {
+                alert("回傳訊息: code " + code + msg);
+                location.reload();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        })
+    }
+</script>

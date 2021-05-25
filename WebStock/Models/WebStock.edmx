@@ -74,6 +74,15 @@
           <Property Name="closePrice" Type="float" Nullable="false" />
           <Property Name="spread" Type="float" Nullable="false" />
         </EntityType>
+        <EntityType Name="stockFavorite">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="operId" Type="int" Nullable="false" />
+          <Property Name="code" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="memo" Type="nvarchar" MaxLength="50" />
+        </EntityType>
         <EntityType Name="stockIndex">
           <Key>
             <PropertyRef Name="id" />
@@ -86,6 +95,29 @@
           <Property Name="dataDate" Type="datetime" Nullable="false" />
           <Property Name="isEnable" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="stockMemo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="code" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="ext1" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext2" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext3" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext4" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext5" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext6" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext7" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext8" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext9" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext10" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext11" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext12" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext13" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext14" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext15" Type="nvarchar" MaxLength="50" />
+          <Property Name="ext16" Type="nvarchar" MaxLength="50" />
+        </EntityType>
         <EntityType Name="stockNow">
           <Key>
             <PropertyRef Name="id" />
@@ -95,6 +127,18 @@
           <Property Name="closePrice" Type="float" Nullable="false" />
           <Property Name="position" Type="float" Nullable="false" />
           <Property Name="dataDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="stockProfit">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="code" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="buyPrice" Type="float" Nullable="false" />
+          <Property Name="buyShares" Type="int" Nullable="false" />
+          <Property Name="buyCost" Type="int" Nullable="false" />
+          <Property Name="profit" Type="int" Nullable="false" />
+          <Property Name="profitPercentage" Type="float" Nullable="false" />
         </EntityType>
         <EntityType Name="sysConfig">
           <Key>
@@ -122,8 +166,11 @@
           <EntitySet Name="stockData" EntityType="Self.stockData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockDataTmp" EntityType="Self.stockDataTmp" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockDataTmpOtc" EntityType="Self.stockDataTmpOtc" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockFavorite" EntityType="Self.stockFavorite" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockIndex" EntityType="Self.stockIndex" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockMemo" EntityType="Self.stockMemo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="stockNow" EntityType="Self.stockNow" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="stockProfit" EntityType="Self.stockProfit" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysConfig" EntityType="Self.sysConfig" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysLog" EntityType="Self.sysLog" Schema="dbo" store:Type="Tables" />
         </EntityContainer>
@@ -141,6 +188,9 @@
           <EntitySet Name="stockNow" EntityType="WebStockModel.stockNow" />
           <EntitySet Name="sysLog" EntityType="WebStockModel.sysLog" />
           <EntitySet Name="sysConfig" EntityType="WebStockModel.sysConfig" />
+          <EntitySet Name="stockMemo" EntityType="WebStockModel.stockMemo" />
+          <EntitySet Name="stockFavorite" EntityType="WebStockModel.stockFavorite" />
+          <EntitySet Name="stockProfit" EntityType="WebStockModel.stockProfit" />
         </EntityContainer>
         <EntityType Name="member">
           <Key>
@@ -252,6 +302,50 @@
           <Property Name="nowDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="avgStartDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="avgEndDate" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="stockMemo">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="code" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="ext1" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext2" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext3" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext4" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext5" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext6" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext7" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext8" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext9" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext10" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext11" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext12" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext13" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext14" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext15" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="ext16" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="stockFavorite">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="operId" Type="Int32" Nullable="false" />
+          <Property Name="code" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="memo" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="stockProfit">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="code" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="buyPrice" Type="Double" Nullable="false" />
+          <Property Name="buyShares" Type="Int32" Nullable="false" />
+          <Property Name="buyCost" Type="Int32" Nullable="false" />
+          <Property Name="profit" Type="Int32" Nullable="false" />
+          <Property Name="profitPercentage" Type="Double" Nullable="false" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -375,6 +469,53 @@
                 <ScalarProperty Name="nowDate" ColumnName="nowDate" />
                 <ScalarProperty Name="otcUpdate" ColumnName="otcUpdate" />
                 <ScalarProperty Name="stockUpdate" ColumnName="stockUpdate" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockMemo">
+            <EntityTypeMapping TypeName="WebStockModel.stockMemo">
+              <MappingFragment StoreEntitySet="stockMemo">
+                <ScalarProperty Name="ext16" ColumnName="ext16" />
+                <ScalarProperty Name="ext15" ColumnName="ext15" />
+                <ScalarProperty Name="ext14" ColumnName="ext14" />
+                <ScalarProperty Name="ext13" ColumnName="ext13" />
+                <ScalarProperty Name="ext12" ColumnName="ext12" />
+                <ScalarProperty Name="ext11" ColumnName="ext11" />
+                <ScalarProperty Name="ext10" ColumnName="ext10" />
+                <ScalarProperty Name="ext9" ColumnName="ext9" />
+                <ScalarProperty Name="ext8" ColumnName="ext8" />
+                <ScalarProperty Name="ext7" ColumnName="ext7" />
+                <ScalarProperty Name="ext6" ColumnName="ext6" />
+                <ScalarProperty Name="ext5" ColumnName="ext5" />
+                <ScalarProperty Name="ext4" ColumnName="ext4" />
+                <ScalarProperty Name="ext3" ColumnName="ext3" />
+                <ScalarProperty Name="ext2" ColumnName="ext2" />
+                <ScalarProperty Name="ext1" ColumnName="ext1" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockFavorite">
+            <EntityTypeMapping TypeName="WebStockModel.stockFavorite">
+              <MappingFragment StoreEntitySet="stockFavorite">
+                <ScalarProperty Name="memo" ColumnName="memo" />
+                <ScalarProperty Name="code" ColumnName="code" />
+                <ScalarProperty Name="operId" ColumnName="operId" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="stockProfit">
+            <EntityTypeMapping TypeName="WebStockModel.stockProfit">
+              <MappingFragment StoreEntitySet="stockProfit">
+                <ScalarProperty Name="profitPercentage" ColumnName="profitPercentage" />
+                <ScalarProperty Name="profit" ColumnName="profit" />
+                <ScalarProperty Name="buyCost" ColumnName="buyCost" />
+                <ScalarProperty Name="buyShares" ColumnName="buyShares" />
+                <ScalarProperty Name="buyPrice" ColumnName="buyPrice" />
+                <ScalarProperty Name="code" ColumnName="code" />
                 <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>

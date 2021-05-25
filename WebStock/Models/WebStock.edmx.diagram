@@ -14,6 +14,9 @@
         <EntityTypeShape EntityType="WebStockModel.stockNow" Width="1.5" PointX="6.75" PointY="0.75" />
         <EntityTypeShape EntityType="WebStockModel.sysLog" Width="1.5" PointX="6.75" PointY="6.75" />
         <EntityTypeShape EntityType="WebStockModel.sysConfig" Width="1.5" PointX="6.875" PointY="3.625" />
+        <EntityTypeShape EntityType="WebStockModel.stockMemo" Width="1.5" PointX="0.75" PointY="8.75" />
+        <EntityTypeShape EntityType="WebStockModel.stockFavorite" Width="1.5" PointX="3.375" PointY="8.75" />
+        <EntityTypeShape EntityType="WebStockModel.stockProfit" Width="1.5" PointX="9.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

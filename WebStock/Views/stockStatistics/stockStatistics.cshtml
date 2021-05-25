@@ -1,22 +1,140 @@
 ﻿@model WebStock.ViewModels.stockStatisticsViewModel
 
 @{
+    var db = new WebStock.Models.WebStockEntities();
+    Model.sysConfig = db.sysConfig.Where(x => x.id == 1).FirstOrDefault();
     ViewBag.Title = "stockStatistics";
 }
 <br />
+<style>
+    .sp {
+        font-size: 18px;
+    }
+
+    table th {
+        position: sticky;
+        top: 50px;
+        background-color: #FFE66F;
+    }
+
+    .level-hh {
+        font-weight: bold;
+        color: #AE0000;
+    }
+
+    .level-h {
+        font-weight: bold;
+        color: #FF0000;
+    }
+
+    .level-l {
+        font-weight: bold;
+        color: #00BB00;
+    }
+
+    .level-ll {
+        font-weight: bold;
+        color: #007500;
+    }
+    .memo {
+        text-align: center;
+        border-radius: 30px;
+        font-size: 10px;
+    }
+
+    .ext-1 {
+        background-color: rgb(255 148 148);
+    }
+
+    .ext-2 {
+        background-color: rgb(255 206 206);
+    }
+
+    .ext-3 {
+        background-color: rgb(255 236 121);
+    }
+
+    .ext-4 {
+        background-color: rgb(91 216 132);
+    }
+
+    .ext-5 {
+        background-color: rgb(195 250 133);
+    }
+
+    .ext-6 {
+        background-color: rgb(121 230 247);
+    }
+
+    .ext-7 {
+        background-color: rgb(206 146 243);
+    }
+</style>
 <p>
-    @Html.ActionLink("相對價格表", "stockStatistics", new { }, new { @class = "btn btn-primary btn-lg" })
+    @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-primary btn-lg" })
+    @Html.ActionLink("自選", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-primary " })
+    @Html.ActionLink("庫存損益", "", new { }, new { @class = "btn btn-primary " })
 </p>
 <hr />
-@Html.DropDownListFor(x => x.searchType, new List<SelectListItem>()
+<div>
+    <span class="sp">範圍 : </span><span class="sp">@Model.sysConfig.avgStartDate.ToShortDateString()~@Model.sysConfig.avgEndDate.ToShortDateString()</span>
+    <br />
+    <span class="sp">現價 : </span><span class="sp">@Model.sysConfig.nowDate.ToShortDateString()</span>
+    <br />
+    <span class="sp">結果 : </span><span class="sp">@Model.stockSummaryStatistics.Count() 筆</span>
+</div>
+<br />
+@using (Html.BeginForm("stockStatistics", "stockStatistics"))
+{
+    <span>條件 : </span>
+    @Html.DropDownListFor(x => x.searchType, new List<SelectListItem>()
         {
             new SelectListItem {Text="上市+上櫃", Value="上"},
             new SelectListItem {Text="上市", Value="上市" },
             new SelectListItem {Text="上櫃", Value="上櫃" }
         })
-<br />
+    <span>&ensp;</span>
+    @Html.DropDownListFor(x => x.searchShares, new List<SelectListItem>()
+        {
+            new SelectListItem {Text="張數>=300", Value="300"},
+            new SelectListItem {Text="不限張數", Value="1"}
+        })
+    <span>&ensp;</span>
+    @Html.DropDownListFor(x => x.searchClosePrice, new List<SelectListItem>()
+        {
+            new SelectListItem {Text="現價>=10", Value="10"},
+            new SelectListItem {Text="不限價格", Value="0.0"}
+        })
+    <span>&ensp;</span>
+    @Html.DropDownListFor(x => x.stockNowStatistics.position, new List<SelectListItem>()
+        {
+            new SelectListItem {Text="位置<=0.5", Value="0.5"},
+            new SelectListItem {Text="不限位置", Value="10"}
+        })
+    <div style="height:3px;"></div>
+    <span>排序 : </span>
+    <select id="searchSort" name="searchSort">
+        <option value="position">相對位置</option>
+        <option value="category">產業類別</option>
+        <option value="avgShares">交易張數</option>
+        <option value="avgTurnover">交易金額</option>
+        <option value="highestPrice">平均高價</option>
+        <option value="lowestPrice">平均低價</option>
+        <option value="closePrice">目前價格</option>
+    </select>
+    <span>&ensp;</span>
+    <select id="searchAorD" name="searchAorD">
+        <option value="ASC">小->大</option>
+        <option value="DESC">大->小</option>
+    </select>
+    <div style="height:3px;"></div>
+    <input id="searchCode" type="text" name="searchCode" placeholder="股票代碼/名稱" style="margin-left:5px;width:120px;" />
+    <input type="submit" value="查詢" class="btn btn-success" />
+}
+
 <br />
 <table class="table">
+
     <tr>
         <th>市場別</th>
         <th>產業類別</th>
@@ -28,6 +146,7 @@
         <th>平均低價</th>
         <th>目前價格</th>
         <th>相對位置</th>
+        <th>備註</th>
     </tr>
 
     @foreach (var item in Model.stockSummaryStatistics)
@@ -40,8 +159,9 @@
                 @Html.DisplayFor(model => item.category)
             </td>
             <td>
-                @Html.DisplayFor(model => item.code)&nbsp;
-                <span title="加入自選" style="color:red;cursor:pointer">❤</span>
+                @Html.ActionLink(item.code, "", new { }, new { href = "https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID=" + item.code })
+                &nbsp;
+                <span onClick="Create(@item.code)" title="加入自選" style="color:red;cursor:pointer">❤</span>
             </td>
             <td>
                 @Html.DisplayFor(model => item.company)
@@ -62,9 +182,64 @@
                 @Html.DisplayFor(model => item.closePrice)
             </td>
             <td>
-                @Html.DisplayFor(model => item.position)
+                @{
+                    if (item.position >= 1)
+                    {
+                        <div class="level-hh">@item.position</div>
+                    }
+                    else if (item.position < 1 && item.position > 0.5)
+                    {
+                        <div class="level-h">@item.position</div>
+                    }
+                    else if (item.position > 0 && item.position <= 0.5)
+                    {
+                        <div class="level-l">@item.position</div>
+                    }
+                    else if (item.position <= 0)
+                    {
+                        <div class="level-ll">@item.position</div>
+                    }
+                }
+            </td>
+            <td>
+                @{
+                    if (item.memo != string.Empty)
+                    {
+                        string[] strmemos = item.memo.Split(',');
+                        <div class="memo ext-1">@strmemos[0]</div>
+                        <div class="memo ext-2">@strmemos[1]</div>
+                        <div class="memo ext-3">@strmemos[2]</div>
+                        <div class="memo ext-4">@strmemos[3]</div>
+                        <div class="memo ext-5">@strmemos[4]</div>
+                        <div class="memo ext-6">@strmemos[5]</div>
+                        <div class="memo ext-7">@strmemos[6]</div>
+                    }
+                }
             </td>
         </tr>
     }
-
 </table>
+
+<script>
+    function Create(code) {
+
+        $.ajax({
+            url: "@Url.Action("stockFavorite")",
+            data: {code : code},
+            type: "POST",
+            dataType: 'text',
+
+            success: function (msg) {
+                if (msg == "success") { alert("加入自選成功: " + code); }
+                else { alert("加入自選失敗: " + code); }
+
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        })
+    }
+
+</script>
+
