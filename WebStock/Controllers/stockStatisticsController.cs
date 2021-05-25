@@ -27,6 +27,21 @@ namespace WebStock.Controllers
 
             return View(stockStatisticsViewModel);
         }
+        [HttpPost]
+        public ActionResult stockStatistics(stockStatisticsViewModel viewModel)
+        {
+            List<stockSummaryStatistics> summaryStatistics = commonModel.summaryStatistics(viewModel);
+            stockStatisticsViewModel stockStatisticsViewModel = new stockStatisticsViewModel();
+            stockStatisticsViewModel.stockSummaryStatistics = summaryStatistics;
 
+            return View(stockStatisticsViewModel);
+        }
+
+        
+        public string stockFavorite(string code)
+        {
+            string result = commonModel.addFavorite(code, UserInfo.OperId);
+            return result;
+        }
     }
 }

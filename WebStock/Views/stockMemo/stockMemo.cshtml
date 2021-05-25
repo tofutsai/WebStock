@@ -1,0 +1,43 @@
+﻿@model WebStock.ViewModels.stockMemoViewModel
+
+@{
+    ViewBag.Title = "stockMemo";
+}
+    
+
+<h2>stockMemo</h2>
+<hr />
+@Html.ActionLink("Ref GoodInfo", "", new { href = "https://goodinfo.tw/StockInfo/index.asp" })
+<br />
+<br />
+@using (Html.BeginForm())
+{
+    @Html.DropDownListFor(x => x.type, new List<SelectListItem>()
+{
+    new SelectListItem {Text="Select ext", Value="", Disabled=true },
+    new SelectListItem {Text="ext1 月KD", Value="ext1"},
+    new SelectListItem {Text="ext2 週KD", Value="ext2"},
+    new SelectListItem {Text="ext3 淨利", Value="ext3"},
+    new SelectListItem {Text="ext4 ROE", Value="ext4"},
+    new SelectListItem {Text="ext5 EPS", Value="ext5"},
+    new SelectListItem {Text="ext6 殖利率", Value="ext6"},
+    new SelectListItem {Text="ext7 本益比", Value="ext7"}
+})
+    <br />
+    <br />
+    <div>
+        Memo
+    </div>
+    <input id="memoContent" type="text" name="memoContent" style="width:150px;" />
+    <br />
+    <br />
+    <div>
+        Codes
+    </div>
+    @Html.TextAreaFor(x=>x.stockMemo.code, new { style = "width:150px;height:100px;" })
+    <br />
+    <input type="submit" value="submit" class="btn btn-success" />
+    <span style="color:red;font-weight:bold">@ViewBag.Message</span>
+    
+}
+
