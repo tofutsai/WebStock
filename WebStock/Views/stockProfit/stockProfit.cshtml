@@ -1,0 +1,224 @@
+﻿@model WebStock.ViewModels.stockProfitViewModel
+@using System.Globalization;
+@{
+    ViewBag.Title = "stockProfit";
+
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<style>
+    table th {
+        position: sticky;
+        top: 50px;
+        background-color: #FFE66F;
+    }
+
+    input {
+        border: solid 0px;
+        border-bottom: solid 1px #ccc;
+    }
+
+    .level-hh {
+        font-weight: bold;
+        color: #AE0000;
+    }
+
+    .level-h {
+        font-weight: bold;
+        color: #FF0000;
+    }
+
+    .level-l {
+        font-weight: bold;
+        color: #00BB00;
+    }
+
+    .level-ll {
+        font-weight: bold;
+        color: #007500;
+    }
+
+    input {
+        border: solid 0px;
+        border-bottom: solid 1px #ccc;
+    }
+</style>
+<br />
+<p>
+    @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-primary" })
+    @Html.ActionLink("自選清單", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-primary" })
+    @Html.ActionLink("庫存損益", "stockProfit", "stockProfit", new { }, new { @class = "btn btn-primary btn-lg" })
+</p>
+<hr />
+<p>
+    <input id="codeInput" type="text" name="code" value="" placeholder="股票代碼/名稱" style="width:100px;" />
+    <input id="priceInput" type="text" name="buyPrice" value="" placeholder="購買價格" style="width:100px;" />
+    <input id="sharesInput" type="text" name="buyShares" value="" placeholder="購買股數" style="width:100px;" />
+    <span onclick="Create()" style="color:blue;cursor:pointer">新增庫存</span>
+</p>
+<b>總成本 : </b><span style="font-weight: bold;color: blue">@Model.stockInventoryProfits.Sum(x => int.Parse(x.buyCost, NumberStyles.AllowThousands)).ToString("###,###")</span>&nbsp;&nbsp;
+@{
+    string totalProfit = Model.stockInventoryProfits.Sum(x => int.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign)).ToString("###,###");
+    if (totalProfit.Contains("-"))
+    {
+        <b>總損益 : </b><span style="font-weight: bold;color:#00BB00">@totalProfit</span><span>&nbsp;&nbsp;</span>
+    }
+    else
+    {
+        <b>總損益 : </b><span style="font-weight: bold;color:#FF0000">@totalProfit</span><span>&nbsp;&nbsp;</span>
+    }
+    const int percentage = 100;
+    double totalCost = Model.stockInventoryProfits.Sum(x => double.Parse(x.buyCost, NumberStyles.AllowThousands));
+    double totalprofit = Model.stockInventoryProfits.Sum(x => double.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign));
+    double totalProfitPercentage = Math.Round(totalprofit / totalCost * percentage, 2);
+    if (totalProfitPercentage > 0)
+    {
+        <span style="font-weight: bold;color:#FF0000">@totalProfitPercentage%</span>
+    }
+    else
+    {
+        <span style="font-weight: bold;color: #00BB00">@totalProfitPercentage%</span>
+    }
+}
+
+
+<table class="table">
+    <tr>
+        <th>代碼</th>
+        <th>公司名稱</th>
+        <th>相對位置</th>
+        <th>目前價格</th>
+        <th>買進價格</th>
+        <th>買進股數</th>
+        <th>買進成本</th>
+        <th>預估損益</th>
+        <th>預估損益%</th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model.stockInventoryProfits)
+    {
+        <tr>
+            <td>
+                @Html.ActionLink(item.code, "", new { }, new { href = "https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID=" + item.code })
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.company)
+            </td>
+            <td>
+                @{
+                    if (item.position >= 1)
+                    {
+                        <div class="level-hh">@item.position</div>
+                    }
+                    else if (item.position < 1 && item.position > 0.5)
+                    {
+                        <div class="level-h">@item.position</div>
+                    }
+                    else if (item.position > 0 && item.position <= 0.5)
+                    {
+                        <div class="level-l">@item.position</div>
+                    }
+                    else if (item.position <= 0)
+                    {
+                        <div class="level-ll">@item.position</div>
+                    }
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.closePrice)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.buyPrice)
+            </td>
+            <td>
+                @{
+                    int buyshares = int.Parse(item.buyShares);
+                    <div>@buyshares.ToString("###,###")</div>
+                }
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.buyCost)
+            </td>
+            <td>
+                @{
+                    if (item.profit.Contains("-"))
+                    {
+                        <div class="level-l">@item.profit</div>
+                    }
+                    else
+                    {
+                        <div class="level-h">@item.profit</div>
+                    }
+                }
+            </td>
+            <td>
+                @{
+                    if (item.profitPercentage < 0)
+                    {
+                        <div class="level-l">@item.profitPercentage.ToString()%</div>
+                    }
+                    else
+                    {
+                        <div class="level-h">@item.profitPercentage.ToString()%</div>
+                    }
+                }
+
+            </td>
+            <td>
+                <span onclick="Delete(@item.code)" style="color:red; cursor:pointer;" title="刪除"><i class="bi bi-trash-fill" style="font-size:20px;"></i></span>
+            </td>
+        </tr>
+    }
+</table>
+<script>
+    function Create() {
+        let code = $("#codeInput").val();
+        let buyPrice = $("#priceInput").val();
+        let buyShares = $("#sharesInput").val();
+        let data = {
+            code: code,
+            buyPrice: buyPrice,
+            buyShares: buyShares,
+        }
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("createStockInventory")",
+            data: data,
+            dataType: "text",
+            success: function (msg) {
+                if (msg.includes("不")) {
+                    alert(msg);
+                    location.reload();
+                }
+                else {
+                    alert("回傳訊息: " + code + msg);
+                    location.reload();
+                }
+                
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        })
+    }
+    function Delete(code) {
+        var yes = confirm("確定刪除庫存:  " + code + " 嗎?");
+        if (yes) {
+            var data = { code: code };
+            $.ajax({
+            type: "POST",
+            url: "@Url.Action("deleteStockInventory")",
+            data: data,
+            dataType: "text",
+            success: function (msg) {
+                alert("回傳訊息: code:" + code + msg);
+                location.reload();
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        })
+        }
+    }
+</script>

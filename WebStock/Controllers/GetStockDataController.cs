@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
+using WebStock.ViewModels;
+using static WebStock.Models.CommonModel;
 
 namespace WebStock.Controllers
 {
@@ -104,33 +106,26 @@ namespace WebStock.Controllers
 
         public string sysConfigAjax(sysConfig sys)
         {
-            string sql = @"UPDATE sysConfig
-                           SET
-                           stockUpdate = @stockUpdate, 
-                           otcUpdate = @otcUpdate, 
-                           nowDate = @nowDate,  
-                           avgStartDate = @avgStartDate,  
-                           avgEndDate = @avgEndDate 
-                           WHERE id = @id;";
-            using (var db = new WebStockEntities())
-            {
-                if (sys != null)
-                {
-                   int res = db.Database.ExecuteSqlCommand(sql,
-                   new SqlParameter("@stockUpdate", sys.stockUpdate),
-                   new SqlParameter("@otcUpdate", sys.otcUpdate),
-                   new SqlParameter("@nowDate", sys.nowDate),
-                   new SqlParameter("@avgStartDate", sys.avgStartDate),
-                   new SqlParameter("@avgEndDate", sys.avgEndDate),
-                   new SqlParameter("@id", sys.id)
-                );
-                    db.SaveChanges();
-                    return "upDate success !";
-                }
-                else
-                    return "upDate error !";
-            }
+            string msg = commonModel.sysConfigUpdate(sys);
+            return msg;
+        }
 
+        public ActionResult getSingleStock()
+        {
+            List<getSingleStock> getSingleStocks = new List<getSingleStock>();
+            getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
+            stockViewModel.getSingleStock = getSingleStocks;
+
+            return View(stockViewModel);
+        }
+
+       [HttpPost]
+       public ActionResult getSingleStock(stockData data)
+        {
+            List<getSingleStock> getSingleStocks = commonModel.getSingleStockData(data);
+            getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
+            stockViewModel.getSingleStock = getSingleStocks;
+            return View(stockViewModel);
         }
     }
 }

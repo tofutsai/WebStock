@@ -1,10 +1,17 @@
 ﻿@{
    
 }
-<h1>@ViewBag.Message</h1>
-
-<div class="row">
-    @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-primary btn-lg" })
-    @Html.ActionLink("自選清單", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-primary btn-lg" })
-    @Html.ActionLink("庫存損益", "", new { }, new { @class = "btn btn-primary " })
+<div class="jumbotron">
+    <h1>@ViewBag.Message</h1>
+    <br />
+    <br />
+    <div>
+        @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-primary btn-lg" })
+        <sapn>&nbsp</sapn>
+        @Html.ActionLink("自選清單", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-primary btn-lg" })
+        <sapn>&nbsp</sapn>
+        @Html.ActionLink("庫存損益", "stockProfit", "stockProfit", new { }, new { @class = "btn btn-primary btn-lg" })
+        <span>&nbsp</span>
+        @Html.ActionLink("登出", "Logout", "Login", new {}, new {@class = "btn btn-danger btn-lg"})
+    </div>
 </div>

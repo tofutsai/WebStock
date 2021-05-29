@@ -133,6 +133,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\stockFavoriteController.cs" />
+    <Compile Include="Controllers\stockIndexController.cs" />
     <Compile Include="Controllers\stockMemoController.cs" />
     <Compile Include="Controllers\stockProfitController.cs" />
     <Compile Include="Controllers\stockStatisticsController.cs" />
@@ -196,8 +197,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>WebStock.edmx</DependentUpon>
     </Compile>
+    <Compile Include="ViewModels\getSingleStockViewModel.cs" />
     <Compile Include="ViewModels\stockFavoriteViewModel.cs" />
     <Compile Include="ViewModels\stockMemoViewModel.cs" />
+    <Compile Include="ViewModels\stockProfitViewModel.cs" />
     <Compile Include="ViewModels\stockStatisticsViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -260,11 +263,13 @@
     <Content Include="Views\GetStockData\sysConfig.cshtml" />
     <Content Include="Views\stockFavorite\selfFavorite.cshtml" />
     <Content Include="Views\stockMemo\stockMemo.cshtml" />
+    <Content Include="Views\stockProfit\stockProfit.cshtml" />
+    <Content Include="Views\stockIndex\Index.cshtml" />
+    <Content Include="Views\GetStockData\getSingleStock.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Views\Base\" />
-    <Folder Include="Views\stockProfit\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />

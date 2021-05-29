@@ -1,0 +1,69 @@
+﻿@model WebStock.ViewModels.getSingleStockViewModel
+
+@{
+    ViewBag.Title = "StockData";
+}
+<style>
+    table th {
+        position: sticky;
+        top: 50px;
+        background-color: #FFE66F;
+    }
+</style>
+<h2>StockData</h2>
+<hr />
+@using (Html.BeginForm("getSingleStock","GetStockData"))
+{
+    <input id="code" type="text" name="code" placeholder="股票代碼/名稱" style="width:120px;" />
+    <input id="dataDate" type="date" name="dataDate" value="" />
+    <input type="submit" value="查詢" class="btn btn-success" />
+}
+<br />
+<table class="table">
+    <tr>
+        <th>股票代碼</th>
+        <th>公司名稱</th>
+        <th>日期</th>
+        <th>交易張數</th>
+        <th>交易金額(百萬)</th>
+        <th>開盤價</th>
+        <th>最高價</th>
+        <th>最低價</th>
+        <th>收盤價</th>
+    </tr>
+
+    @foreach (var item in Model.getSingleStock)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.code)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.company)
+            </td>
+            <td>
+               @item.dataDate.ToShortDateString()
+            </td>
+            <td>
+                @item.shares.ToString("###,###")
+            </td>
+            <td>
+                @item.turnover.ToString("###,###").Split('.')[0]
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.openPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.highestPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.lowestPrice)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.closePrice)
+            </td>
+
+        </tr>
+    }
+
+</table>
