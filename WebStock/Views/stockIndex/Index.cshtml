@@ -1,0 +1,62 @@
+﻿@model IEnumerable<WebStock.Models.stockIndex>
+
+@{
+    ViewBag.Title = "stockIndex";
+}
+<style>
+    table th {
+        position: sticky;
+        top: 50px;
+        background-color: #FFE66F;
+    }
+</style>
+
+<h2>stockIndex</h2>
+<hr />
+<table class="table">
+    <tr>
+        <th>
+            市場別
+        </th>
+        <th>
+            產業類別
+        </th>
+        <th>
+            股票代碼
+        </th>
+        <th>
+            公司名稱
+        </th>
+        <th>
+            上市日期
+        </th>
+        <th>
+            啟用/關閉
+        </th>
+        
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.type)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.category)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.code)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.company)
+        </td>
+        <td>
+            @item.dataDate.ToShortDateString()
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.isEnable)
+        </td>
+    </tr>
+}
+
+</table>

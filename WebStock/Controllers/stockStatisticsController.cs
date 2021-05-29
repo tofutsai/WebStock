@@ -12,13 +12,7 @@ namespace WebStock.Controllers
     public class stockStatisticsController : BaseController
     {
         CommonModel commonModel = new CommonModel();
-        // GET: stockStatistics
-        public ActionResult index()
-        {
-            return View();
-        }
-
-        
+              
         public ActionResult stockStatistics()
         {
             List<stockSummaryStatistics> summaryStatistics = commonModel.summaryStatistics();

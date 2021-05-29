@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Web;
 using WebStock.ViewModels;
@@ -62,7 +63,21 @@ namespace WebStock.Models
 
         public class stockSelfFavorite : stockSummaryStatistics
         {
-            
+
+        }
+
+        public class stockInventoryProfit : stockSummaryStatistics
+        {
+            public double buyPrice { get; set; }
+            public string buyShares { get; set; }
+            public string buyCost { get; set; }
+            public string profit { get; set; }
+            public double profitPercentage { get; set; }
+        }
+
+        public class getSingleStock : stockData
+        {
+            public string company { get; set; }
         }
 
         public string GetJWTToken(object payload)
@@ -276,6 +291,9 @@ namespace WebStock.Models
                 }
                 else
                 {
+                    stockIndex company = db.stockIndex.Where(x => x.company == viewModel.searchCode).FirstOrDefault();
+                    if (company != null)
+                        viewModel.searchCode = company.code;
                     string strsql = sql + " WHERE i.code = @code";
                     stockSummaryStatistics = db.Database.SqlQuery<stockSummaryStatistics>(strsql,
                                                 new SqlParameter("@code", viewModel.searchCode)).ToList();
@@ -321,10 +339,44 @@ namespace WebStock.Models
             return favorites;
         }
 
+
+        internal List<stockInventoryProfit> getStockProfit(int operId)
+        {
+            List<stockInventoryProfit> stockInventoryProfits = new List<stockInventoryProfit>();
+            using (var db = new WebStockEntities())
+            {
+                string sql = @"SELECT
+                            	i.code
+                               ,i.company
+                               ,n.position
+                               ,n.closePrice
+                               ,p.buyPrice
+                               ,p.buyShares
+                               ,p.buyCost
+                               ,p.profit
+                               ,p.profitPercentage
+                            FROM stockIndex i
+                            JOIN stockNow n
+                            	ON i.code = n.code
+                            JOIN stockProfit p
+                            	ON i.code = p.code
+                            WHERE P.operId = @operId;";
+                stockInventoryProfits = db.Database.SqlQuery<stockInventoryProfit>(sql,
+                                           new SqlParameter("@operId", operId)).ToList();
+
+            }
+            return stockInventoryProfits;
+        }
+
         internal string createFavoriteStock(string code, int operId)
         {
             using (var db = new WebStockEntities())
             {
+                stockIndex company = db.stockIndex.Where(x => x.company == code || x.code == code).FirstOrDefault();
+                if (company != null)
+                    code = company.code;
+                else
+                    return " 新增自選失敗，請輸入正確股票代碼/名稱";
                 stockFavorite stockFavorite = db.stockFavorite.Where(x => x.code == code && x.operId == operId).FirstOrDefault();
                 if (stockFavorite != null)
                     return " 自選已存在無須新增!";
@@ -336,7 +388,7 @@ namespace WebStock.Models
                         new SqlParameter("@operId", operId),
                         new SqlParameter("@code", code));
                 }
-                
+
             }
             return " 新增自選成功";
         }
@@ -357,7 +409,7 @@ namespace WebStock.Models
 
         internal string updateStockMemo(stockFavorite favorite, int operId)
         {
-            using(var db = new WebStockEntities())
+            using (var db = new WebStockEntities())
             {
                 var stockFavorite = db.stockFavorite.Where(x => x.operId == operId && x.code == favorite.code).FirstOrDefault();
                 if (stockFavorite != null)
@@ -368,7 +420,7 @@ namespace WebStock.Models
                 }
                 else
                     return " 自行備註編輯失敗";
-                    
+
             }
             throw new NotImplementedException();
         }
@@ -439,6 +491,129 @@ namespace WebStock.Models
                 }
             }
             return "新增成功";
+        }
+
+        internal string createStockInventory(stockProfit profit, int operId)
+        {
+            try
+            {
+                if (profit.buyPrice == 0 || profit.buyShares == null || profit.code == null)
+                    return "資料輸入不完全無法新增!";
+                using (var db = new WebStockEntities())
+                {
+                    stockIndex company = db.stockIndex.Where(x => x.company == profit.code).FirstOrDefault();
+                    if (company != null)
+                        profit.code = company.code;
+                    const double buycommision = 1.001425;
+                    const double sellcommision = 0.004425;
+                    const int percentage = 100;
+                    stockProfit stockProfit = new stockProfit();
+                    stockNow stockNow = db.stockNow.Where(x => x.code == profit.code).FirstOrDefault();
+                    if (stockNow == null)
+                        return "資料輸入錯誤，請重新輸入!!";
+                    stockProfit.operId = operId;
+                    stockProfit.code = profit.code;
+                    stockProfit.buyPrice = profit.buyPrice;
+                    stockProfit.buyShares = profit.buyShares;
+                    stockProfit.buyCost = (profit.buyPrice * int.Parse(profit.buyShares) * buycommision).ToString("###,###");
+                    stockProfit.profit = (stockNow.closePrice * int.Parse(profit.buyShares) * (1 - sellcommision) - (profit.buyPrice * int.Parse(profit.buyShares) * buycommision)).ToString("###,###");
+                    stockProfit.profitPercentage = Math.Round(double.Parse(stockProfit.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign) / double.Parse(stockProfit.buyCost, NumberStyles.AllowThousands) * percentage, 2);
+                    db.stockProfit.Add(stockProfit);
+                    db.SaveChanges();
+                }
+                return "新增到庫存成功!";
+            }
+            catch (Exception ex)
+            {
+                return "資料輸入錯誤，請重新輸入!!";
+            }
+
+        }
+
+        internal string deleteStockInventory(string code, int operId)
+        {
+            using (var db = new WebStockEntities())
+            {
+                stockProfit stockProfit = db.stockProfit.Where(x => x.code == code && x.operId == operId).FirstOrDefault();
+                if (stockProfit != null)
+                {
+                    db.stockProfit.Remove(stockProfit);
+                    db.SaveChanges();
+                    return "刪除庫存成功";
+                }
+                else
+                    return "刪除庫存失敗";
+            }
+        }
+
+        internal List<stockIndex> getStockIndex()
+        {
+            List<stockIndex> stockIndexs = new List<stockIndex>();
+            using (var db = new WebStockEntities())
+            {
+                stockIndexs = db.stockIndex.ToList();
+            }
+            return stockIndexs;
+        }
+
+        internal string sysConfigUpdate(sysConfig sys)
+        {
+            string sql = @"UPDATE sysConfig
+                           SET
+                           stockUpdate = @stockUpdate, 
+                           otcUpdate = @otcUpdate, 
+                           nowDate = @nowDate,  
+                           avgStartDate = @avgStartDate,  
+                           avgEndDate = @avgEndDate 
+                           WHERE id = @id;";
+            using (var db = new WebStockEntities())
+            {
+                if (sys != null)
+                {
+                    int res = db.Database.ExecuteSqlCommand(sql,
+                    new SqlParameter("@stockUpdate", sys.stockUpdate),
+                    new SqlParameter("@otcUpdate", sys.otcUpdate),
+                    new SqlParameter("@nowDate", sys.nowDate),
+                    new SqlParameter("@avgStartDate", sys.avgStartDate),
+                    new SqlParameter("@avgEndDate", sys.avgEndDate),
+                    new SqlParameter("@id", sys.id)
+                 );
+                    db.SaveChanges();
+                    return "upDate success !";
+                }
+                else
+                    return "upDate error !";
+            }
+        }
+
+        internal List<getSingleStock> getSingleStockData(stockData data)
+        {
+            List<getSingleStock> getSingleStocks = new List<getSingleStock>();
+            if (string.IsNullOrEmpty(data.code) || data.dataDate == DateTime.MinValue)
+                return getSingleStocks;
+            
+            using (var db = new WebStockEntities())
+            {
+                sysConfig sysConfig = db.sysConfig.FirstOrDefault();
+                string sql = @"SELECT
+                               	d.code
+                               ,i.company
+                               ,d.dataDate
+                               ,d.shares
+                               ,d.turnover
+                               ,d.openPrice
+                               ,d.highestPrice
+                               ,d.lowestPrice
+                               ,d.closePrice
+                               FROM stockData d
+                               JOIN stockIndex i
+                               ON i.code = d.code
+                               WHERE d.code = @code";
+                string strsql = sql + string.Format(" AND d.dataDate BETWEEN '{0}' AND '{1}' ORDER BY D.dataDate DESC", data.dataDate.ToShortDateString(), sysConfig.nowDate.ToShortDateString());
+                getSingleStocks = db.Database.SqlQuery<getSingleStock>(strsql,
+                                    new SqlParameter("@code", data.code)).ToList();
+            }
+            return getSingleStocks;
         }
     }
 }

@@ -16,10 +16,11 @@ namespace WebStock.Models
     {
         public int id { get; set; }
         public string code { get; set; }
+        public int operId { get; set; }
         public double buyPrice { get; set; }
-        public int buyShares { get; set; }
-        public int buyCost { get; set; }
-        public int profit { get; set; }
+        public string buyShares { get; set; }
+        public string buyCost { get; set; }
+        public string profit { get; set; }
         public double profitPercentage { get; set; }
     }
 }
