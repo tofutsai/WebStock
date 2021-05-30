@@ -8,7 +8,7 @@ using WebStock.ViewModels;
 
 namespace WebStock.Controllers
 {
-    public class stockMemoController : Controller
+    public class stockMemoController : BaseController
     {
         CommonModel commonModel = new CommonModel();
         // GET: stockMemo

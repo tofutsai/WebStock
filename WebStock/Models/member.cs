@@ -21,5 +21,6 @@ namespace WebStock.Models
         public bool providerFB { get; set; }
         public bool providerGoogle { get; set; }
         public string role { get; set; }
+        public bool isAdmin { get; set; }
     }
 }

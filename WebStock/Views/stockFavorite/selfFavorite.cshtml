@@ -35,6 +35,39 @@
         border: solid 0px;
         border-bottom: solid 1px #ccc;
     }
+    .memo {
+        text-align: center;
+        border-radius: 30px;
+        font-size: 10px;
+    }
+
+    .ext-1 {
+        background-color: rgb(255 148 148);
+    }
+
+    .ext-2 {
+        background-color: rgb(255 206 206);
+    }
+
+    .ext-3 {
+        background-color: rgb(255 236 121);
+    }
+
+    .ext-4 {
+        background-color: rgb(91 216 132);
+    }
+
+    .ext-5 {
+        background-color: rgb(195 250 133);
+    }
+
+    .ext-6 {
+        background-color: rgb(121 230 247);
+    }
+
+    .ext-7 {
+        background-color: rgb(206 146 243);
+    }
 </style>
 <br />
 <p>
@@ -102,6 +135,19 @@
                 }
             </td>
             <td>
+                @{
+                    if (item.memo != string.Empty)
+                    {
+                        string[] strmemos = item.memo.Split(',');
+                        <div class="memo ext-1">@strmemos[0]</div>
+                        <div class="memo ext-2">@strmemos[1]</div>
+                        <div class="memo ext-3">@strmemos[2]</div>
+                        <div class="memo ext-4">@strmemos[3]</div>
+                        <div class="memo ext-5">@strmemos[4]</div>
+                        <div class="memo ext-6">@strmemos[5]</div>
+                        <div class="memo ext-7">@strmemos[6]</div>
+                    }
+                }
             </td>
             <td style="width:200px;">
                 @{

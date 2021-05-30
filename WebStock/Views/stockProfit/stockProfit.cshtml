@@ -70,7 +70,11 @@
     double totalCost = Model.stockInventoryProfits.Sum(x => double.Parse(x.buyCost, NumberStyles.AllowThousands));
     double totalprofit = Model.stockInventoryProfits.Sum(x => double.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign));
     double totalProfitPercentage = Math.Round(totalprofit / totalCost * percentage, 2);
-    if (totalProfitPercentage > 0)
+    if (Double.NaN.Equals(totalProfitPercentage))
+    {
+        <span></span>
+    }
+    else if (totalProfitPercentage > 0)
     {
         <span style="font-weight: bold;color:#FF0000">@totalProfitPercentage%</span>
     }
@@ -193,7 +197,7 @@
                     alert("回傳訊息: " + code + msg);
                     location.reload();
                 }
-                
+
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);

@@ -7,7 +7,7 @@ using WebStock.Models;
 
 namespace WebStock.Controllers
 {
-    public class stockIndexController : Controller
+    public class stockIndexController : BaseController
     {
         CommonModel commonModel = new CommonModel();
         // GET: stockIndex
