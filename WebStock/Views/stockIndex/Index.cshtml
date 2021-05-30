@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WebStock.Models.stockIndex>
+﻿@model  WebStock.ViewModels.ReportViewModel.StockIndexView
 
 @{
     ViewBag.Title = "stockIndex";
@@ -33,30 +33,31 @@
         <th>
             啟用/關閉
         </th>
-        
+
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.type)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.category)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.code)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.company)
-        </td>
-        <td>
-            @item.dataDate.ToShortDateString()
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.isEnable)
-        </td>
-    </tr>
-}
+    @foreach (var item in Model.data)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.category)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.code)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.company)
+            </td>
+            <td>
+                @item.dataDate.ToShortDateString()
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.isEnable)
+            </td>
+        </tr>
+    }
 
 </table>

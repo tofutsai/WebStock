@@ -1,4 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using JWT;
+using JWT.Algorithms;
+using JWT.Exceptions;
+using JWT.Serializers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -11,6 +15,62 @@ namespace WebStock.Models
 {
     public class CommonModel
     {
+        public class UserInfo
+        {
+            public string JWToken { get; set; }
+            public int OperId { get; set; }
+            public string OperAccount { get; set; }
+            public string OperName { get; set; }
+            public string OperRole { get; set; }
+            public bool OperIsAdmin { get; set; }
+        }
+
+        //public static string TokenSecretKey = ConfigurationManager.AppSettings["TokenSecretKey"].ToString();
+        public static string TokenSecretKey = "HELLOKITTY";
+        public static string EncodeJWTToken(object payload)
+        {
+
+            var secret = TokenSecretKey;
+
+            IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
+            IJsonSerializer serializer = new JsonNetSerializer();
+            IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+            IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
+
+            var token = encoder.Encode(payload, secret);
+            //Console.WriteLine(token);
+
+            return token;
+        }
+
+        public static UserInfo DecodeJWTToken(string jwtToken)
+        {
+
+            try
+            {
+                IJsonSerializer serializer = new JsonNetSerializer();
+                IDateTimeProvider provider = new UtcDateTimeProvider();
+                IJwtValidator validator = new JwtValidator(serializer, provider);
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
+                IJwtDecoder decoder = new JwtDecoder(serializer, validator, urlEncoder, algorithm);
+                UserInfo dd = decoder.DecodeToObject<UserInfo>(jwtToken, TokenSecretKey, true);
+
+                return dd;
+            }
+            catch (TokenExpiredException)
+            {
+                Console.WriteLine("Token has expired");
+                return null;
+            }
+            catch (SignatureVerificationException)
+            {
+                Console.WriteLine("Token has invalid signature");
+                return null;
+            }
+
+        }
+
         public class stockDataAPI
         {
             public string stat { get; set; }
@@ -29,15 +89,6 @@ namespace WebStock.Models
             public string iTotalRecords { get; set; }
             public string iTotalDisplayRecords { get; set; }
             public List<List<string>> aaData { get; set; }
-        }
-
-        public class UserInfo
-        {
-            public int OperId { get; set; }
-            public string OperAccount { get; set; }
-            public string OperName { get; set; }
-            public string OperRole { get; set; }
-            public bool OperIsAdmin { get; set; }
         }
 
         public class stockStatistics : stockAvg
@@ -87,7 +138,7 @@ namespace WebStock.Models
             return jsonString;
 
         }
-        internal UserInfo DecodeJWTToken(string jwtToken)
+        internal UserInfo DecodeJWTTokenMVC(string jwtToken)
         {
             UserInfo userInfo = JsonConvert.DeserializeObject<UserInfo>(jwtToken);
             return userInfo;

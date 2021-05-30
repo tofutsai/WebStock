@@ -39,7 +39,7 @@ namespace WebStock
 
                     //取得 FormsAuthenticationTicket
                     var UserData = identity.Ticket.UserData;
-                    UserInfo = CommonModel.DecodeJWTToken(UserData);
+                    UserInfo = CommonModel.DecodeJWTTokenMVC(UserData);
 
                     string[] roles = UserInfo.OperRole.Split(new char[] { ',' });
 

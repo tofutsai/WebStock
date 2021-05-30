@@ -1,4 +1,4 @@
-﻿@model WebStock.ViewModels.getSingleStockViewModel
+﻿@model WebStock.ViewModels.ReportViewModel.StockDataView
 
 @{
     ViewBag.Title = "StockData";
@@ -12,12 +12,20 @@
 </style>
 <h2>StockData</h2>
 <hr />
-@using (Html.BeginForm("getSingleStock","GetStockData"))
+@*@using (Html.BeginForm("getSingleStock", "GetStockData"))
 {
     <input id="code" type="text" name="code" placeholder="股票代碼/名稱" style="width:120px;" />
     <input id="dataDate" type="date" name="dataDate" value="" />
     <input type="submit" value="查詢" class="btn btn-success" />
+}*@
+
+@using (Html.BeginForm("getSingleStock", "GetStockData"))
+{
+    @Html.TextBoxFor(model => model.formSearch.code, new { placeholder = "股票代碼/名稱", style = "width:120px;" })
+    @Html.TextBoxFor(model => model.formSearch.dataDate, "{0:yyyy-MM-dd}", new { type = "date" })
+    <input type="submit" value="Search" class="btn btn-default" />
 }
+
 <br />
 <table class="table">
     <tr>
@@ -32,7 +40,7 @@
         <th>收盤價</th>
     </tr>
 
-    @foreach (var item in Model.getSingleStock)
+    @foreach (var item in Model.data)
     {
         <tr>
             <td>
@@ -42,7 +50,7 @@
                 @Html.DisplayFor(model => item.company)
             </td>
             <td>
-               @item.dataDate.ToShortDateString()
+                @item.dataDate.ToShortDateString()
             </td>
             <td>
                 @item.shares.ToString("###,###")
