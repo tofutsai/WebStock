@@ -1,0 +1,42 @@
+﻿
+@{
+    ViewBag.Title = "Report";
+}
+
+<h2>Report</h2>
+<hr />
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-2">
+            @Html.ActionLink("相對價格表", "stockStatistics", "stockStatistics", new { }, new { @class = "btn btn-success btn-lg" })
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-2">
+            @Html.ActionLink("自選清單", "selfFavorite", "stockFavorite", new { }, new { @class = "btn btn-success btn-lg" })
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-2">
+            @Html.ActionLink("庫存損益", "stockProfit", "stockProfit", new { }, new { @class = "btn btn-success btn-lg" })
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-2">
+            @Html.ActionLink("個股索引清單", "Index", "stockIndex", new { }, new { @class = "btn btn-primary btn-lg" })
+        </div>
+    </div>
+</div>
+<div class="form-horizontal">
+    <div class="form-group">
+        <div class="col-md-2">
+            @Html.ActionLink("個股每日價格", "getSingleStock", "GetStockData", new { }, new { @class = "btn btn-primary btn-lg" })
+        </div>
+    </div>
+</div>

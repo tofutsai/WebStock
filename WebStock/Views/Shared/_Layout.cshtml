@@ -1,4 +1,14 @@
-﻿<!DOCTYPE html>
+﻿@using WebStock.Models
+@using WebStock.Controllers
+@{
+    BaseController controller = ViewContext.Controller as BaseController;
+    if (controller == null)
+    {
+        throw new ApplicationException("Controller 必須繼承自 MyControllerBase.");
+    }
+    var userInfo = controller.UserInfo;
+}
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -16,14 +26,41 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @{
+                    if (userInfo.OperAccount == null)
+                    {
+                        @Html.ActionLink("Home", "Login", "Login", new { area = "" }, new { @class = "navbar-brand" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                    }
+                }
+
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("DownloadStockData", "Index", "GetStockData")</li>
-                    <li>@Html.ActionLink("stockStatistics", "stockStatistics", "stockStatistics")</li>
-                    <li>@Html.ActionLink("stockMemo", "stockMemo", "stockMemo")</li>
-                    <li>@Html.ActionLink("Login", "Login", "Login")</li>
+                    @{
+                        if (userInfo.OperIsAdmin)
+                        {
+                            <li>@Html.ActionLink("Report", "Report", "Report")</li>
+                            <li>@Html.ActionLink("DownloadStockData", "Index", "GetStockData")</li>
+                            <li>@Html.ActionLink("stockMemo", "stockMemo", "stockMemo")</li>
+                        }
+                        else
+                        {
+                            if (userInfo.OperAccount == null)
+                            {
+                                <li>@Html.ActionLink("Report", "Login", "Login")</li>
+                            }
+                            else
+                            {
+                                <li>@Html.ActionLink("Report", "Report", "Report")</li>
+                            }
+
+                        }
+                    }
+
                 </ul>
             </div>
         </div>

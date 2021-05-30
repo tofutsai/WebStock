@@ -132,6 +132,7 @@
     <Compile Include="Controllers\GetStockDataController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
     <Compile Include="Controllers\stockFavoriteController.cs" />
     <Compile Include="Controllers\stockIndexController.cs" />
     <Compile Include="Controllers\stockMemoController.cs" />
@@ -266,6 +267,7 @@
     <Content Include="Views\stockProfit\stockProfit.cshtml" />
     <Content Include="Views\stockIndex\Index.cshtml" />
     <Content Include="Views\GetStockData\getSingleStock.cshtml" />
+    <Content Include="Views\Report\Report.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

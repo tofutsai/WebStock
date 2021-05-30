@@ -15,7 +15,7 @@ namespace WebStock.Models
         {
             string strPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(formData.password, "SHA1");
             formData.password = strPassword;
-
+            formData.role = "user";
             db.member.Add(formData);
 
             return db.SaveChanges();
@@ -37,6 +37,7 @@ namespace WebStock.Models
                 OperAccount = member.account,
                 OperName = member.name,
                 OperRole = member.role,
+                OperIsAdmin = member.isAdmin
 
             };
 

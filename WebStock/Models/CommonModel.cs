@@ -37,6 +37,7 @@ namespace WebStock.Models
             public string OperAccount { get; set; }
             public string OperName { get; set; }
             public string OperRole { get; set; }
+            public bool OperIsAdmin { get; set; }
         }
 
         public class stockStatistics : stockAvg
@@ -321,18 +322,29 @@ namespace WebStock.Models
             using (var db = new WebStockEntities())
             {
                 string sql = @"SELECT
-                               i.type
-                              ,i.category
-                              ,i.code 
-                              ,i.company
-                              ,n.closePrice 
-                              ,n.position
-                              FROM stockIndex i
-                              JOIN stockNow n
-                              	ON i.code = n.code
-                              JOIN stockFavorite f
-                              	ON i.code = f.code
-                              WHERE f.operId = @operId";
+                                i.type
+                               ,i.category
+                               ,i.code 
+                               ,i.company
+                               ,n.closePrice 
+                               ,n.position
+                               ,ISNULL(
+                               	m.ext1 + ',' +
+                               	m.ext2 + ',' +
+                               	m.ext3 + ',' +
+                               	m.ext4 + ',' +
+                               	m.ext5 + ',' +
+                               	m.ext6 + ',' +
+                               	m.ext7
+                               	, '') AS memo
+                               FROM stockIndex i
+                               JOIN stockNow n
+                               	ON i.code = n.code
+                               JOIN stockFavorite f
+                               	ON i.code = f.code
+                               LEFT JOIN stockMemo m
+                               ON f.code = m.code
+                               WHERE f.operId = @operId";
                 favorites = db.Database.SqlQuery<stockSelfFavorite>(sql,
                             new SqlParameter("@operId", operId)).ToList();
             }
