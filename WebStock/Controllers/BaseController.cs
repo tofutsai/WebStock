@@ -28,7 +28,7 @@ namespace WebStock.Controllers
                 var ticket = identity.Ticket;
 
                 //將 Ticket 內的 UserData 解析回 User 物件
-                UserInfo = CommonModel.DecodeJWTToken(ticket.UserData);
+                UserInfo = CommonModel.DecodeJWTTokenMVC(ticket.UserData);
 
             }
         }
