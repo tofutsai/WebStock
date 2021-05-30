@@ -9,11 +9,13 @@ using System.Web.Mvc;
 using WebStock.Models;
 using WebStock.ViewModels;
 using static WebStock.Models.CommonModel;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
 {
     public class GetStockDataController : BaseController
     {
+        ReportModel ReportModel = new ReportModel();
         // GET: GetStockData
         public ActionResult Index()
         {
@@ -112,20 +114,40 @@ namespace WebStock.Controllers
 
         public ActionResult getSingleStock()
         {
-            List<getSingleStock> getSingleStocks = new List<getSingleStock>();
-            getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
-            stockViewModel.getSingleStock = getSingleStocks;
+            //List<getSingleStock> getSingleStocks = new List<getSingleStock>();
+            //getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
+            //stockViewModel.getSingleStock = getSingleStocks;
 
-            return View(stockViewModel);
+            //return View(stockViewModel);
+
+            StockDataView StockDataView = new StockDataView();
+            FormSearch f = new FormSearch();
+            f.dataDate = DateTime.UtcNow.AddHours(8).AddMonths(-1);
+            StockDataView.formSearch = f;
+            StockDataView.data = new List<RSD>();
+            return View(StockDataView);
         }
 
-       [HttpPost]
-       public ActionResult getSingleStock(stockData data)
+        [HttpPost]
+        public ActionResult getSingleStock(StockDataView d)
         {
-            List<getSingleStock> getSingleStocks = commonModel.getSingleStockData(data);
-            getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
-            stockViewModel.getSingleStock = getSingleStocks;
-            return View(stockViewModel);
+            //List<getSingleStock> getSingleStocks = commonModel.getSingleStockData(data);
+            //getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
+            //stockViewModel.getSingleStock = getSingleStocks;
+            //return View(stockViewModel);
+
+            //預設查詢條件
+            FormSearch f = new FormSearch();
+            f = d.formSearch;
+            f.options = new Options();
+            f.options.sortBy = new string[] { "dataDate" };
+            f.options.sortDesc = new bool[] { true };
+            f.options.page = 1;
+            f.options.itemsPerPage = 9999;
+
+            StockDataView StockDataView = new StockDataView();
+            StockDataView.data = ReportModel.ReadStockData(f);
+            return View(StockDataView);
         }
     }
 }
