@@ -17,8 +17,8 @@ namespace WebStock.Controllers
         [HttpPost]
         public JsonResult ReadStockIndex(FormSearch f)
         {
-            List<RSID> data = ReportModel.ReadStockIndex(f);
-            return Json(new Results<List<RSID>>
+            List<RSI> data = ReportModel.ReadStockIndex(f);
+            return Json(new Results<List<RSI>>
             {
                 Success = data.Count() > 0 ? true : false,
                 Message = data.Count() > 0 ? "查詢成功!" : "查詢失敗!",

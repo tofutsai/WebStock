@@ -353,20 +353,7 @@ namespace WebStock.Models
             }
             return stockSummaryStatistics;
         }
-
-        internal string addFavorite(string code, int OperId)
-        {
-            using (var db = new WebStockEntities())
-            {
-                stockFavorite favorite = new stockFavorite();
-                favorite.operId = OperId;
-                favorite.code = code;
-                db.stockFavorite.Add(favorite);
-                db.SaveChanges();
-
-                return "success";
-            }
-        }
+                
         internal List<stockSelfFavorite> getStockFavorite(int operId)
         {
             List<stockSelfFavorite> favorites = new List<stockSelfFavorite>();
@@ -423,9 +410,16 @@ namespace WebStock.Models
                             	ON i.code = n.code
                             JOIN stockProfit p
                             	ON i.code = p.code
-                            WHERE P.operId = @operId;";
+                            WHERE p.operId = @operId;";
                 stockInventoryProfits = db.Database.SqlQuery<stockInventoryProfit>(sql,
                                            new SqlParameter("@operId", operId)).ToList();
+                const double sellcommision = 0.004425;
+                const int percentage = 100;
+                foreach (var item in stockInventoryProfits)
+                {
+                    item.profit = ((item.closePrice * int.Parse(item.buyShares) * (1 - sellcommision)) - int.Parse(item.buyCost, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign)).ToString("###,###");
+                    item.profitPercentage = Math.Round(double.Parse(item.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign) / double.Parse(item.buyCost, NumberStyles.AllowThousands) * percentage, 2);
+                }
 
             }
             return stockInventoryProfits;

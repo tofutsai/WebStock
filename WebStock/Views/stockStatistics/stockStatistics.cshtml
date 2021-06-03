@@ -1,8 +1,6 @@
-﻿@model WebStock.ViewModels.stockStatisticsViewModel
+﻿@model WebStock.ViewModels.ReportViewModel.StockStatisticsView
 
 @{
-    var db = new WebStock.Models.WebStockEntities();
-    Model.sysConfig = db.sysConfig.Where(x => x.id == 1).FirstOrDefault();
     ViewBag.Title = "stockStatistics";
 }
 <br />
@@ -36,6 +34,7 @@
         font-weight: bold;
         color: #007500;
     }
+
     .memo {
         text-align: center;
         border-radius: 30px;
@@ -81,54 +80,57 @@
     <br />
     <span class="sp">現價 : </span><span class="sp">@Model.sysConfig.nowDate.ToShortDateString()</span>
     <br />
-    <span class="sp">結果 : </span><span class="sp">@Model.stockSummaryStatistics.Count() 筆</span>
+    <span class="sp">結果 : </span><span class="sp">@Model.data.Count() 筆</span>
 </div>
 <br />
 @using (Html.BeginForm("stockStatistics", "stockStatistics"))
 {
     <span>條件 : </span>
-    @Html.DropDownListFor(x => x.searchType, new List<SelectListItem>()
+    @Html.DropDownListFor(x => x.formSearch.type, new List<SelectListItem>()
         {
             new SelectListItem {Text="上市+上櫃", Value="上"},
             new SelectListItem {Text="上市", Value="上市" },
             new SelectListItem {Text="上櫃", Value="上櫃" }
         })
     <span>&ensp;</span>
-    @Html.DropDownListFor(x => x.searchShares, new List<SelectListItem>()
+    @Html.DropDownListFor(x => x.formSearch.shares, new List<SelectListItem>()
         {
             new SelectListItem {Text="張數>=300", Value="300"},
             new SelectListItem {Text="不限張數", Value="1"}
         })
     <span>&ensp;</span>
-    @Html.DropDownListFor(x => x.searchClosePrice, new List<SelectListItem>()
+    @Html.DropDownListFor(x => x.formSearch.closePrice, new List<SelectListItem>()
         {
             new SelectListItem {Text="現價>=10", Value="10"},
             new SelectListItem {Text="不限價格", Value="0.0"}
         })
     <span>&ensp;</span>
-    @Html.DropDownListFor(x => x.stockNowStatistics.position, new List<SelectListItem>()
+    @Html.DropDownListFor(x => x.formSearch.position2, new List<SelectListItem>()
         {
             new SelectListItem {Text="位置<=0.5", Value="0.5"},
             new SelectListItem {Text="不限位置", Value="10"}
         })
     <div style="height:3px;"></div>
     <span>排序 : </span>
-    <select id="searchSort" name="searchSort">
-        <option value="position">相對位置</option>
-        <option value="category">產業類別</option>
-        <option value="avgShares">交易張數</option>
-        <option value="avgTurnover">交易金額</option>
-        <option value="highestPrice">平均高價</option>
-        <option value="lowestPrice">平均低價</option>
-        <option value="closePrice">目前價格</option>
-    </select>
+    @Html.DropDownListFor(x => x.formSearch.options.sortByStr, new List<SelectListItem>()
+        {
+            new SelectListItem {Text="相對位置", Value="position"},
+            new SelectListItem {Text="產業類別", Value="category"},
+            new SelectListItem {Text="交易張數", Value="avgShares"},
+            new SelectListItem {Text="交易金額", Value="avgTurnover"},
+            new SelectListItem {Text="平均高價", Value="highestPrice"},
+            new SelectListItem {Text="平均低價", Value="lowestPrice"},
+            new SelectListItem {Text="目前價格", Value="closePrice"},
+        })
     <span>&ensp;</span>
-    <select id="searchAorD" name="searchAorD">
-        <option value="ASC">小->大</option>
-        <option value="DESC">大->小</option>
-    </select>
+    @Html.DropDownListFor(x => x.formSearch.options.sortDescBool, new List<SelectListItem>()
+    {
+        new SelectListItem{Text="小->大", Value="false"},
+        new SelectListItem{Text="大->小", Value="true"}
+    })
     <div style="height:3px;"></div>
-    <input id="searchCode" type="text" name="searchCode" placeholder="股票代碼/名稱" style="margin-left:5px;width:120px;" />
+    @Html.TextBoxFor(model => model.formSearch.code, new { placeholder = "股票代碼/名稱", style = "width:120px;" })
+
     <input type="submit" value="查詢" class="btn btn-success" />
 }
 
@@ -149,7 +151,7 @@
         <th>備註</th>
     </tr>
 
-    @foreach (var item in Model.stockSummaryStatistics)
+    @foreach (var item in Model.data)
     {
         <tr>
             <td>

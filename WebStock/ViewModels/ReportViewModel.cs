@@ -15,8 +15,8 @@ namespace WebStock.ViewModels
             public string code { get; set; }
             public int shares { get; set; }
             public double closePrice { get; set; }
-            public double position1 { get; set; }
-            public double position2 { get; set; }
+            public double position1 { get; set; }//大於多少
+            public double position2 { get; set; }//小於多少
             public DateTime dataDate { get; set; }
             public Options options { get; set; }
         }
@@ -34,10 +34,10 @@ namespace WebStock.ViewModels
         public class StockIndexView
         {
             public FormSearch formSearch { get; set; }
-            public List<RSID> data { get; set; }
+            public List<RSI> data { get; set; }
 
         }
-        public class RSID : stockIndex
+        public class RSI : stockIndex
         {
             public int totalCount { get; set; }
         }
@@ -54,5 +54,22 @@ namespace WebStock.ViewModels
             public int totalCount { get; set; }
         }
 
+        public class StockStatisticsView
+        {
+            public FormSearch formSearch { get; set; }
+            public List<RSS> data { get; set; }
+            public sysConfig sysConfig { get; set; }
+        }
+        public class RSS : stockAvg
+        {
+            public string type { get; set; }
+            public string company { get; set; }
+            public string category { get; set; }
+            public double position { get; set; }
+            public double closePrice { get; set; }
+            public string memo { get; set; }
+            public int totalCount { get; set; }
+
+        }
     }
 }
