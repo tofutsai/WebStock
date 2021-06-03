@@ -6,35 +6,40 @@ using System.Web.Mvc;
 using WebStock.Models;
 using static WebStock.Models.CommonModel;
 using WebStock.ViewModels;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
 {
     public class stockStatisticsController : BaseController
     {
-        CommonModel commonModel = new CommonModel();
-              
+        ReportModel ReportModel = new ReportModel();
         public ActionResult stockStatistics()
         {
-            List<stockSummaryStatistics> summaryStatistics = commonModel.summaryStatistics();
-            stockStatisticsViewModel stockStatisticsViewModel = new stockStatisticsViewModel();
-            stockStatisticsViewModel.stockSummaryStatistics = summaryStatistics;
+            StockStatisticsView stockStatisticsView = new StockStatisticsView();
+            FormSearch form = new FormSearch();
+            form.options = new Options();
+            stockStatisticsView.formSearch = form;
+            stockStatisticsView.sysConfig = new WebStockEntities().sysConfig.FirstOrDefault();
+            stockStatisticsView.data = ReportModel.ReadStockStatistics();
 
-            return View(stockStatisticsViewModel);
+            return View(stockStatisticsView);
         }
         [HttpPost]
-        public ActionResult stockStatistics(stockStatisticsViewModel viewModel)
+        public ActionResult stockStatistics(StockStatisticsView data)
         {
-            List<stockSummaryStatistics> summaryStatistics = commonModel.summaryStatistics(viewModel);
-            stockStatisticsViewModel stockStatisticsViewModel = new stockStatisticsViewModel();
-            stockStatisticsViewModel.stockSummaryStatistics = summaryStatistics;
+            StockStatisticsView stockStatisticsView = new StockStatisticsView();
+            data.formSearch.options.page = 1;
+            data.formSearch.options.itemsPerPage = 9999;
+            stockStatisticsView.sysConfig = new WebStockEntities().sysConfig.FirstOrDefault();
+            stockStatisticsView.data = ReportModel.ReadStockStatistics(data.formSearch);
 
-            return View(stockStatisticsViewModel);
+            return View(stockStatisticsView);
         }
 
         
         public string stockFavorite(string code)
         {
-            string result = commonModel.addFavorite(code, UserInfo.OperId);
+            string result = ReportModel.addFavorite(code, UserInfo.OperId);
             return result;
         }
     }

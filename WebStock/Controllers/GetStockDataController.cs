@@ -114,39 +114,28 @@ namespace WebStock.Controllers
 
         public ActionResult getSingleStock()
         {
-            //List<getSingleStock> getSingleStocks = new List<getSingleStock>();
-            //getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
-            //stockViewModel.getSingleStock = getSingleStocks;
-
-            //return View(stockViewModel);
-
             StockDataView StockDataView = new StockDataView();
-            FormSearch f = new FormSearch();
-            f.dataDate = DateTime.UtcNow.AddHours(8).AddMonths(-1);
-            StockDataView.formSearch = f;
+            FormSearch form = new FormSearch();
+            form.dataDate = DateTime.UtcNow.AddHours(8).AddMonths(-1);
+            StockDataView.formSearch = form;
             StockDataView.data = new List<RSD>();
             return View(StockDataView);
         }
 
         [HttpPost]
-        public ActionResult getSingleStock(StockDataView d)
+        public ActionResult getSingleStock(StockDataView data)
         {
-            //List<getSingleStock> getSingleStocks = commonModel.getSingleStockData(data);
-            //getSingleStockViewModel stockViewModel = new getSingleStockViewModel();
-            //stockViewModel.getSingleStock = getSingleStocks;
-            //return View(stockViewModel);
-
             //預設查詢條件
-            FormSearch f = new FormSearch();
-            f = d.formSearch;
-            f.options = new Options();
-            f.options.sortBy = new string[] { "dataDate" };
-            f.options.sortDesc = new bool[] { true };
-            f.options.page = 1;
-            f.options.itemsPerPage = 9999;
+            FormSearch form = new FormSearch();
+            form = data.formSearch;
+            form.options = new Options();
+            form.options.sortBy = new string[] { "dataDate" };
+            form.options.sortDesc = new bool[] { true };
+            form.options.page = 1;
+            form.options.itemsPerPage = 9999;
 
             StockDataView StockDataView = new StockDataView();
-            StockDataView.data = ReportModel.ReadStockData(f);
+            StockDataView.data = ReportModel.ReadStockData(form);
             return View(StockDataView);
         }
     }

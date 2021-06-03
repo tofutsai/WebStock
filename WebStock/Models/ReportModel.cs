@@ -9,7 +9,7 @@ namespace WebStock.Models
 {
     public class ReportModel
     {
-        internal List<RSID> ReadStockIndex(FormSearch f)
+        internal List<RSI> ReadStockIndex(FormSearch f)
         {
             using (var db = new WebStockEntities())
             {
@@ -65,7 +65,7 @@ namespace WebStock.Models
                 }
 
                 sqlStr = string.Format(sqlStr, whereStr, sortStr, sortDESC, pageStr);
-                List<RSID> rs = db.Database.SqlQuery<RSID>(sqlStr,
+                List<RSI> rs = db.Database.SqlQuery<RSI>(sqlStr,
                     new SqlParameter("@type", f.type),
                     new SqlParameter("@code", f.code ?? string.Empty),
                     new SqlParameter("@OFFSET", ((f.options.page - 1) * f.options.itemsPerPage)),
@@ -149,6 +149,147 @@ namespace WebStock.Models
                 { return new List<RSD>(); }
 
                 return datas;
+            }
+        }
+
+        internal List<RSS> ReadStockStatistics()
+        {
+            List<RSS> stockSummaryStatistics = new List<RSS>();
+            using (var db = new WebStockEntities())
+            {
+                string sql = @"SELECT
+                          	  i.type
+                             ,i.category
+                             ,i.code 
+                             ,i.company 
+                             ,a.avgShares 
+                             ,a.avgTurnover 
+                             ,a.highestPrice 
+                             ,a.lowestPrice 
+                             ,n.closePrice 
+                             ,n.position
+                             ,ISNULL(
+	                          m.ext1 + ',' +
+	                          m.ext2 + ',' +
+	                          m.ext3 + ',' +
+	                          m.ext4 + ',' +
+	                          m.ext5 + ',' +
+	                          m.ext6 + ',' +
+	                          m.ext7
+	                          , '') AS memo
+                          FROM stockIndex i
+                          JOIN stockAvg a
+                          	ON i.code = a.code
+                          JOIN stockNow n
+                          	ON i.code = n.code
+                          LEFT JOIN stockMemo m
+	                        ON m.code = i.code
+                          ORDER BY i.category";
+                stockSummaryStatistics = db.Database.SqlQuery<RSS>(sql).ToList();
+            }
+            return stockSummaryStatistics;
+        }
+
+        internal List<RSS> ReadStockStatistics(FormSearch form)
+        {
+            using (var db = new WebStockEntities())
+            {
+                string strSqlTmp = @"
+                                    SELECT
+                                    count(1) over() as totalCount, 
+                                    i.type
+                                   ,i.category
+                                   ,i.code 
+                                   ,i.company 
+                                   ,a.avgShares 
+                                   ,a.avgTurnover 
+                                   ,a.highestPrice 
+                                   ,a.lowestPrice 
+                                   ,n.closePrice 
+                                   ,n.position
+                                   ,ISNULL(
+	                                m.ext1 + ',' +
+	                                m.ext2 + ',' +
+	                                m.ext3 + ',' +
+	                                m.ext4 + ',' +
+	                                m.ext5 + ',' +
+	                                m.ext6 + ',' +
+	                                m.ext7
+	                                , '') AS memo
+                                    FROM stockIndex i
+                                    JOIN stockAvg a
+                                    ON i.code = a.code
+                                    JOIN stockNow n
+                                    ON i.code = n.code
+                                    LEFT JOIN stockMemo m
+	                                ON m.code = i.code";
+
+                if (string.IsNullOrEmpty(form.code))
+                {
+                    strSqlTmp += @" WHERE i.type LIKE '%'+ @type +'%' AND a.avgShares >= @shares AND n.position <= @position AND
+                                    n.closePrice >= @closePrice {0} {1} {2} ";
+                    string sortStr = "ORDER BY ";
+                    string sortDESCbool = form.options.sortDescBool ? "DESC" : "ASC";
+                    string pageStr = "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
+
+                    string sortByStrType = form.options.sortByStr != null ? form.options.sortByStr : "";
+                    switch (sortByStrType)
+                    {
+                        case "position": sortStr += "n.position"; break;
+                        case "category": sortStr += "i.category"; break;
+                        case "avgShares": sortStr += "a.avgShares"; break;
+                        case "avgTurnover": sortStr += "a.avgTurnover"; break;
+                        case "highestPrice": sortStr += "a.highestPrice"; break;
+                        case "lowestPrice": sortStr += "a.lowestPrice"; break;
+                        case "closePrice": sortStr += "n.closePrice"; break;
+                        default: sortStr += "i.dataDate"; break;
+                    }
+
+                    string strSql = string.Format(strSqlTmp, sortStr, sortDESCbool, pageStr);
+
+                    List<RSS> datas = db.Database.SqlQuery<RSS>(strSql,
+                        new SqlParameter("@type", form.type),
+                        new SqlParameter("@shares", form.shares),
+                        new SqlParameter("@position", form.position2),
+                        new SqlParameter("@closePrice", form.closePrice),
+                        new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
+                        new SqlParameter("@FETCH", form.options.itemsPerPage)
+                        ).ToList();
+
+                    if (datas.Count == 0)
+                    { return new List<RSS>(); }
+
+                    return datas;
+                }
+                else
+                {
+                    strSqlTmp += @" WHERE ( a.code LIKE @code OR i.company LIKE @code )";
+                    List<RSS> datas = db.Database.SqlQuery<RSS>(strSqlTmp,
+                        new SqlParameter("@code", form.code)).ToList();
+
+                    if (datas.Count == 0)
+                    { return new List<RSS>(); }
+
+                    return datas;
+
+                }
+
+                
+            }
+            
+        }
+
+        internal string addFavorite(string code, int OperId)
+        {
+            using (var db = new WebStockEntities())
+            {
+                stockFavorite favorite = new stockFavorite();
+                favorite.operId = OperId;
+                favorite.code = code;
+                db.stockFavorite.Add(favorite);
+                db.SaveChanges();
+
+                return "success";
             }
         }
     }

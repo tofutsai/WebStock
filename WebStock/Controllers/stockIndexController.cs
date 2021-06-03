@@ -15,20 +15,17 @@ namespace WebStock.Controllers
         // GET: stockIndex
         public ActionResult Index()
         {
-            //List<stockIndex> stockIndexs = commonModel.getStockIndex();
-            //return View(stockIndexs);
-
             //預設查詢條件
-            FormSearch f = new FormSearch();
-            f.type = "上";
-            f.options = new Options();
-            f.options.sortBy = new string[] { "id" };
-            f.options.sortDesc = new bool[] { false };
-            f.options.page = 1;
-            f.options.itemsPerPage = 9999;
+            FormSearch form = new FormSearch();
+            form.type = "上";
+            form.options = new Options();
+            form.options.sortBy = new string[] { "id" };
+            form.options.sortDesc = new bool[] { false };
+            form.options.page = 1;
+            form.options.itemsPerPage = 9999;
 
             StockIndexView StockIndexView = new StockIndexView();
-            StockIndexView.data = ReportModel.ReadStockIndex(f);
+            StockIndexView.data = ReportModel.ReadStockIndex(form);
             return View(StockIndexView);
         }
     }
