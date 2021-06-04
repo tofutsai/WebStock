@@ -5,38 +5,41 @@ using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
 using WebStock.ViewModels;
-using static WebStock.Models.CommonModel;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
 {
     public class stockFavoriteController : BaseController
     {
-        CommonModel commonModel = new CommonModel();
+        ReportModel reportModel = new ReportModel();
         // GET: stockFavorite
         public ActionResult selfFavorite()
         {
-            List<stockSelfFavorite> stockfavorites = commonModel.getStockFavorite(UserInfo.OperId);
-            stockFavoriteViewModel stockFavoriteViewModel = new stockFavoriteViewModel();
-            stockFavoriteViewModel.favorites = stockfavorites;
-            stockFavoriteViewModel.user = UserInfo;
-            return View(stockFavoriteViewModel);
+            StockFavoriteView stockFavoriteView = new StockFavoriteView();
+            FormSearch form = new FormSearch();
+            form.options = new Options();
+            form.options.page = 1;
+            form.options.itemsPerPage = 9999;
+            stockFavoriteView.formSearch = form;
+            stockFavoriteView.data = reportModel.ReadStockFavorite(form,UserInfo.OperId);
+            return View(stockFavoriteView);
         }
 
         public string CreateFavoriteStock(string code)
         {
-            string msg = commonModel.createFavoriteStock(code, UserInfo.OperId);
+            string msg = reportModel.createFavoriteStock(code, UserInfo.OperId);
             return msg;
         }
 
-        public string updateStockMemo(stockFavorite favorite)
+        public string UpdateStockMemo(stockFavorite favorite)
         {
-            string msg = commonModel.updateStockMemo(favorite, UserInfo.OperId);
+            string msg = reportModel.updateStockMemo(favorite, UserInfo.OperId);
             return msg;
         }
 
         public string DeleteFavoriteStock(string code)
         {
-            string msg = commonModel.deleteFavoriteStock(code, UserInfo.OperId);
+            string msg = reportModel.deleteFavoriteStock(code, UserInfo.OperId);
             return msg;
         }
 

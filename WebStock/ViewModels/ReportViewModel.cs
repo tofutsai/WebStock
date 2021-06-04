@@ -71,5 +71,37 @@ namespace WebStock.ViewModels
             public int totalCount { get; set; }
 
         }
+
+        public class StockFavoriteView
+        {
+            public FormSearch formSearch { get; set; }
+            public List<RSF> data { get; set; }
+        }
+        public class RSF : RSS
+        {
+            public string selfmemo { get; set; }
+        }
+
+        public class StockProfitView
+        {
+            public FormSearch formSearch { get; set; }
+            public List<RSP> data { get; set; }
+        }
+        public class RSP : stockProfit
+        {
+            public string company { get; set; }
+            public double position { get; set; }
+            public double closePrice { get; set; }
+            public int totalCount { get; set; }
+        }
+
+        public class stockMemoView
+        {
+            public string type { get; set; }
+            public string memoContent { get; set; }
+            public stockMemo stockMemo { get; set; }
+        }
     }
+
+    
 }

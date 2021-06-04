@@ -5,12 +5,14 @@ using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
 using WebStock.ViewModels;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
 {
     public class stockMemoController : BaseController
     {
         CommonModel commonModel = new CommonModel();
+        ReportModel reportModel = new ReportModel();
         // GET: stockMemo
         public ActionResult stockMemo()
         {
@@ -18,9 +20,9 @@ namespace WebStock.Controllers
         }
 
         [HttpPost]
-        public ActionResult stockMemo(stockMemoViewModel data)
+        public ActionResult stockMemo(stockMemoView data)
         {
-            string result = commonModel.addStockMemo(data);
+            string result = reportModel.addStockMemo(data);
             ViewBag.Message = result;
             return View();
         }

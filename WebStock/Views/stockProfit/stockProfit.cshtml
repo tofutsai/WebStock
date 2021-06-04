@@ -1,4 +1,4 @@
-﻿@model WebStock.ViewModels.stockProfitViewModel
+﻿@model WebStock.ViewModels.ReportViewModel.StockProfitView
 @using System.Globalization;
 @{
     ViewBag.Title = "stockProfit";
@@ -55,9 +55,9 @@
     <input id="sharesInput" type="text" name="buyShares" value="" placeholder="購買股數" style="width:100px;" />
     <span onclick="Create()" style="color:blue;cursor:pointer">新增庫存</span>
 </p>
-<b>總成本 : </b><span style="font-weight: bold;color: blue">@Model.stockInventoryProfits.Sum(x => int.Parse(x.buyCost, NumberStyles.AllowThousands)).ToString("###,###")</span>&nbsp;&nbsp;
+<b>總成本 : </b><span style="font-weight: bold;color: blue">@Model.data.Sum(x => int.Parse(x.buyCost, NumberStyles.AllowThousands)).ToString("###,###")</span>&nbsp;&nbsp;
 @{
-    string totalProfit = Model.stockInventoryProfits.Sum(x => int.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign)).ToString("###,###");
+    string totalProfit = Model.data.Sum(x => int.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign)).ToString("###,###");
     if (totalProfit.Contains("-"))
     {
         <b>總損益 : </b><span style="font-weight: bold;color:#00BB00">@totalProfit</span><span>&nbsp;&nbsp;</span>
@@ -67,8 +67,8 @@
         <b>總損益 : </b><span style="font-weight: bold;color:#FF0000">@totalProfit</span><span>&nbsp;&nbsp;</span>
     }
     const int percentage = 100;
-    double totalCost = Model.stockInventoryProfits.Sum(x => double.Parse(x.buyCost, NumberStyles.AllowThousands));
-    double totalprofit = Model.stockInventoryProfits.Sum(x => double.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign));
+    double totalCost = Model.data.Sum(x => double.Parse(x.buyCost, NumberStyles.AllowThousands));
+    double totalprofit = Model.data.Sum(x => double.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign));
     double totalProfitPercentage = Math.Round(totalprofit / totalCost * percentage, 2);
     if (Double.NaN.Equals(totalProfitPercentage))
     {
@@ -98,7 +98,7 @@
         <th>預估損益%</th>
         <th></th>
     </tr>
-    @foreach (var item in Model.stockInventoryProfits)
+    @foreach (var item in Model.data)
     {
         <tr>
             <td>
@@ -168,7 +168,7 @@
 
             </td>
             <td>
-                <span onclick="Delete(@item.code)" style="color:red; cursor:pointer;" title="刪除"><i class="bi bi-trash-fill" style="font-size:20px;"></i></span>
+                <span onclick="Delete(@item.id,@item.code)" style="color:red; cursor:pointer;" title="刪除"><i class="bi bi-trash-fill" style="font-size:20px;"></i></span>
             </td>
         </tr>
     }
@@ -178,6 +178,10 @@
         let code = $("#codeInput").val();
         let buyPrice = $("#priceInput").val();
         let buyShares = $("#sharesInput").val();
+        if (code == "" || buyPrice == "" || buyShares == "") {
+            alert("資料輸入不完全無法新增!");
+            return;
+        }
         let data = {
             code: code,
             buyPrice: buyPrice,
@@ -189,15 +193,8 @@
             data: data,
             dataType: "text",
             success: function (msg) {
-                if (msg.includes("不")) {
-                    alert(msg);
-                    location.reload();
-                }
-                else {
-                    alert("回傳訊息: " + code + msg);
-                    location.reload();
-                }
-
+                alert("回傳訊息: " + code + msg);
+                location.reload();
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 alert(xhr.status);
@@ -205,10 +202,10 @@
             }
         })
     }
-    function Delete(code) {
+    function Delete(id, code) {
         var yes = confirm("確定刪除庫存:  " + code + " 嗎?");
         if (yes) {
-            var data = { code: code };
+            var data = {id: id, code: code };
             $.ajax({
             type: "POST",
             url: "@Url.Action("deleteStockInventory")",

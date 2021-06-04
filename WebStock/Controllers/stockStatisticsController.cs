@@ -4,8 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
-using static WebStock.Models.CommonModel;
-using WebStock.ViewModels;
 using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
@@ -16,11 +14,18 @@ namespace WebStock.Controllers
         public ActionResult stockStatistics()
         {
             StockStatisticsView stockStatisticsView = new StockStatisticsView();
+            //預設查詢條件
             FormSearch form = new FormSearch();
+            form.type = "上";
+            form.shares = 1;
+            form.closePrice = 0.0;
+            form.position2 = 10;
             form.options = new Options();
+            form.options.page = 1;
+            form.options.itemsPerPage = 9999;
             stockStatisticsView.formSearch = form;
             stockStatisticsView.sysConfig = new WebStockEntities().sysConfig.FirstOrDefault();
-            stockStatisticsView.data = ReportModel.ReadStockStatistics();
+            stockStatisticsView.data = ReportModel.ReadStockStatistics(form);
 
             return View(stockStatisticsView);
         }
