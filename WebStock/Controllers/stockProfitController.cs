@@ -5,33 +5,36 @@ using System.Web;
 using System.Web.Mvc;
 using WebStock.Models;
 using WebStock.ViewModels;
-using static WebStock.Models.CommonModel;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Controllers
 {
     public class stockProfitController : BaseController
     {
-        CommonModel commonModel = new CommonModel();
+        ReportModel reportModel = new ReportModel();
         // GET: stockProfit
         public ActionResult stockProfit()
         {
-            List<stockInventoryProfit> stockInventoryProfits = commonModel.getStockProfit(UserInfo.OperId);
-            stockProfitViewModel stockProfitViewModel = new stockProfitViewModel();
-            stockProfitViewModel.stockInventoryProfits = stockInventoryProfits;
-            stockProfitViewModel.user = UserInfo;
-            return View(stockProfitViewModel);
+            StockProfitView stockProfitView = new StockProfitView();
+            //預設查詢條件
+            FormSearch form = new FormSearch();
+            form.options = new Options();
+            form.options.page = 1;
+            form.options.itemsPerPage = 9999;
+            stockProfitView.formSearch = form;
+            stockProfitView.data = reportModel.ReadStockProfit(form,UserInfo.OperId);
+            return View(stockProfitView);
         }
-
-        
+                
         public string createStockInventory(stockProfit profit)
         {
-            string msg = commonModel.createStockInventory(profit, UserInfo.OperId);
+            string msg = reportModel.createStockInventory(profit, UserInfo.OperId);
             return msg;
         }
 
-        public string deleteStockInventory(string code)
+        public string deleteStockInventory(stockProfit data)
         {
-            string msg = commonModel.deleteStockInventory(code, UserInfo.OperId);
+            string msg = reportModel.deleteStockInventory(data, UserInfo.OperId);
             return msg;
         }
     }
