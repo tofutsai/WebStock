@@ -128,12 +128,8 @@ namespace WebStock.Controllers
             //預設查詢條件
             FormSearch form = new FormSearch();
             form = data.formSearch;
-            form.options = new Options();
             form.options.sortBy = new string[] { "dataDate" };
             form.options.sortDesc = new bool[] { true };
-            form.options.page = 1;
-            form.options.itemsPerPage = 9999;
-
             StockDataView StockDataView = new StockDataView();
             StockDataView.data = ReportModel.ReadStockData(form);
             return View(StockDataView);

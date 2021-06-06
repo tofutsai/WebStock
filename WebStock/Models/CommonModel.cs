@@ -5,6 +5,7 @@ using JWT.Serializers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
@@ -126,16 +127,23 @@ namespace WebStock.Models
             return userInfo;
         }
 
-        internal List<stockAvg> stockAvgStatistics()
+        internal void stockAvgStatistics()
         {
-            List<stockAvg> stockAvgs = new List<stockAvg>();
             List<stockStatistics> stockStatistics = new List<stockStatistics>();
             using (var db = new WebStockEntities())
             {
+                //buckCopy Init
+                DataTable dt = new DataTable();
+                dt.Columns.Add("id", typeof(Int64));
+                dt.Columns.Add("code", typeof(string));
+                dt.Columns.Add("avgPrice", typeof(double));
+                dt.Columns.Add("highestPrice", typeof(double));
+                dt.Columns.Add("lowestPrice", typeof(double));
+                dt.Columns.Add("avgShares", typeof(Int64));
+                dt.Columns.Add("avgTurnover", typeof(double));
+
                 var sys = db.sysConfig.FirstOrDefault();
-                string truncatesql = "truncate table stockAvg";
-                db.Database.ExecuteSqlCommand(truncatesql);
-                db.SaveChanges();
+          
                 string sql = $"select s.code,year(dataDate) as dataYear, round(avg(closeprice),2) as avgPrice, MAX(closeprice) as highestPrice, MIN(closeprice) as lowestPrice, round(avg(shares), 2) as avgShares, round(avg(turnover), 2) as avgTurnover " +
                              $"from stockData s where dataDate between '{sys.avgStartDate.ToShortDateString()}' and '{sys.avgEndDate.ToShortDateString()}' group by year(dataDate), s.code order by s.code, dataYear";
                 stockStatistics = db.Database.SqlQuery<stockStatistics>(sql).ToList();
@@ -163,31 +171,39 @@ namespace WebStock.Models
                     fiveYearsAvglowestPrice = Math.Round(fiveYearsAvglowestPrice / singleCodeStock.Count(), 2);
                     fiveYearsAvgShares = fiveYearsAvgShares / singleCodeStock.Count();
                     fiveYearsAvgTurnOver = Math.Round(fiveYearsAvgTurnOver / singleCodeStock.Count(), 2);
-                    stockAvg stockAvg = new stockAvg();
-                    stockAvg.code = item.code;
-                    stockAvg.avgPrice = fiveYearsAvgPrice;
-                    stockAvg.highestPrice = fiveYearsAvghighestPrice;
-                    stockAvg.lowestPrice = fiveYearsAvglowestPrice;
-                    stockAvg.avgShares = fiveYearsAvgShares;
-                    stockAvg.avgTurnover = fiveYearsAvgTurnOver;
+                    
+                    //BuckCopy寫入結果
+                    DataRow row = dt.NewRow();
+                    row["code"] = item.code;
+                    row["avgPrice"] = fiveYearsAvgPrice;
+                    row["highestPrice"] = fiveYearsAvghighestPrice;
+                    row["lowestPrice"] = fiveYearsAvglowestPrice;
+                    row["avgShares"] = fiveYearsAvgShares;
+                    row["avgTurnover"] = fiveYearsAvgTurnOver;
+                    dt.Rows.Add(row);
+                }
+                //清空資料Table
+                db.Database.ExecuteSqlCommand(@"truncate table stockAvg");
 
-                    stockAvgs.Add(stockAvg);
-                    db.stockAvg.Add(stockAvg);
-                    db.SaveChanges();
+                //sqlBulkCopy 寫入資料Table
+                SqlConnection conn = (SqlConnection)db.Database.Connection;
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                using (var sqlBulkCopy = new SqlBulkCopy((SqlConnection)db.Database.Connection))
+                {
+                    sqlBulkCopy.DestinationTableName = "dbo.stockAvg";
+                    sqlBulkCopy.WriteToServer(dt);
                 }
             }
-            return stockAvgs;
         }
 
-        internal List<stockNow> stockNowsStatistics()
+        internal void stockNowsStatistics()
         {
-            List<stockNow> stockNows = new List<stockNow>();
             List<stockNowStatistics> stockStatisticsNows = new List<stockNowStatistics>();
             using (var db = new WebStockEntities())
             {
-                string truncatesql = "truncate table stockNow";
-                db.Database.ExecuteSqlCommand(truncatesql);
-                db.SaveChanges();
+                
                 string sql = @"SELECT
                               	 i.code AS code
                                  ,dt.dataDate AS dataDate
@@ -215,29 +231,64 @@ namespace WebStock.Models
 
                 stockStatisticsNows = db.Database.SqlQuery<stockNowStatistics>(sql).ToList();
 
+                //buckCopy Init
+                DataTable dt = new DataTable();
+                dt.Columns.Add("id", typeof(Int64));
+                dt.Columns.Add("code", typeof(string));
+                dt.Columns.Add("closePrice", typeof(double));
+                dt.Columns.Add("position", typeof(double));
+                dt.Columns.Add("dataDate", typeof(DateTime));
+
+
                 foreach (var item in db.stockIndex.ToList())
                 {
-                    var stockStatisticsNow = stockStatisticsNows.Where(x => x.code == item.code);
+                    var stockStatisticsNow = stockStatisticsNows.Where(x => x.code == item.code).AsEnumerable();
                     if (stockStatisticsNow.Count() == 0)
                         continue;
                     foreach (var data in stockStatisticsNow)
                     {
-                        stockNow stockNow = new stockNow();
-                        stockNow.code = data.code;
-                        stockNow.dataDate = data.dataDate;
-                        stockNow.closePrice = data.closePrice;
-                        stockNow.position = Math.Round((data.closePrice - data.lowestPrice) / (data.highestPrice - data.lowestPrice), 2);
-                        stockNows.Add(stockNow);
-                        db.stockNow.Add(stockNow);
-                        db.SaveChanges();
+                        //BuckCopy寫入結果
+                        DataRow row = dt.NewRow();
+                        row["code"] = data.code;
+                        row["closePrice"] = data.closePrice;
+                        row["position"] = Math.Round((data.closePrice - data.lowestPrice) / (data.highestPrice - data.lowestPrice), 2);
+                        row["dataDate"] = data.dataDate;
+                        dt.Rows.Add(row);
                     }
                 }
+                //再foreach尚未更新前的stockNow list ，找出code不存在本次list，補充寫入上去dt
+                foreach(var item in db.stockNow.ToList())
+                {
+                    var stockStatisticsNow = stockStatisticsNows.Where(x => x.code == item.code).AsEnumerable();
+                    if (stockStatisticsNow.Count() == 0)
+                    {
+                        DataRow row = dt.NewRow();
+                        row["code"] = item.code;
+                        row["closePrice"] = item.closePrice;
+                        row["position"] = item.position;
+                        row["dataDate"] = item.dataDate;
+                        dt.Rows.Add(row);
+                    }
+                }
+
+                db.Database.ExecuteSqlCommand(@"truncate table stockNow");
+
+                //sqlBulkCopy 寫入資料Table
+                SqlConnection conn = (SqlConnection)db.Database.Connection;
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                using (var sqlBulkCopy = new SqlBulkCopy((SqlConnection)db.Database.Connection))
+                {
+                    sqlBulkCopy.DestinationTableName = "dbo.stockNow";
+                    sqlBulkCopy.WriteToServer(dt);
+                }
+
                 var sysConfig = db.sysConfig.FirstOrDefault();
                 var stocknow = db.stockNow.Where(x => x.id == 1).FirstOrDefault();
                 sysConfig.nowDate = stocknow.dataDate;
                 db.SaveChanges();
             }
-            return stockNows;
         }
                
         internal string sysConfigUpdate(sysConfig sys)

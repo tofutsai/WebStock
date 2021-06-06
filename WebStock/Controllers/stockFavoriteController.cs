@@ -17,9 +17,6 @@ namespace WebStock.Controllers
         {
             StockFavoriteView stockFavoriteView = new StockFavoriteView();
             FormSearch form = new FormSearch();
-            form.options = new Options();
-            form.options.page = 1;
-            form.options.itemsPerPage = 9999;
             stockFavoriteView.formSearch = form;
             stockFavoriteView.data = reportModel.ReadStockFavorite(form,UserInfo.OperId);
             return View(stockFavoriteView);

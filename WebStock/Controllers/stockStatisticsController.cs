@@ -20,9 +20,8 @@ namespace WebStock.Controllers
             form.shares = 1;
             form.closePrice = 0.0;
             form.position2 = 10;
-            form.options = new Options();
-            form.options.page = 1;
-            form.options.itemsPerPage = 9999;
+            form.options.sortBy = new string[] { "position" };
+            form.options.sortDesc = new bool[] { false };
             stockStatisticsView.formSearch = form;
             stockStatisticsView.sysConfig = new WebStockEntities().sysConfig.FirstOrDefault();
             stockStatisticsView.data = ReportModel.ReadStockStatistics(form);
@@ -33,8 +32,8 @@ namespace WebStock.Controllers
         public ActionResult stockStatistics(StockStatisticsView data)
         {
             StockStatisticsView stockStatisticsView = new StockStatisticsView();
-            data.formSearch.options.page = 1;
-            data.formSearch.options.itemsPerPage = 9999;
+            data.formSearch.options.sortBy = new string[] { data.formSearch.options.sortByStr };
+            data.formSearch.options.sortDesc = new bool[] { data.formSearch.options.sortDescBool };
             stockStatisticsView.sysConfig = new WebStockEntities().sysConfig.FirstOrDefault();
             stockStatisticsView.data = ReportModel.ReadStockStatistics(data.formSearch);
 

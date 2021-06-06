@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Web;
 using static WebStock.Models.CommonModel;
 using WebStock.Models;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace WebStock.Models
 {
@@ -16,102 +18,123 @@ namespace WebStock.Models
         SysModel sysModel = new SysModel();
         internal async Task<string> DownloadStock(string date)
         {
-            using (var db = new WebStockEntities())
+
+            string result = "";
+            string apiDate = date.Replace("-", "");
+            string jsonString = await stockAPI(apiDate);
+            int rescount = 0;
+            stockDataAPI stockDataAPI = new stockDataAPI();
+
+            //JSON反序列化裝入刻好的物件，傳入controller
+            stockDataAPI = JsonConvert.DeserializeObject<stockDataAPI>(jsonString);
+
+            if (stockDataAPI.stat.Contains("OK"))
             {
-                string result = "";
-                string apiDate = date.Replace("-", "");
-                string jsonString = await stockAPI(apiDate);
-                int rescount = 0;
-                stockDataAPI stockDataAPI = new stockDataAPI();
+                //init bulkcopy
+                DataTable dt = new DataTable();
+                dt.Columns.Add("id", typeof(Int64));
+                dt.Columns.Add("code", typeof(string));
+                dt.Columns.Add("dataDate", typeof(DateTime));
+                dt.Columns.Add("shares", typeof(Int64));
+                dt.Columns.Add("turnover", typeof(double));
+                dt.Columns.Add("openPrice", typeof(double));
+                dt.Columns.Add("highestPrice", typeof(double));
+                dt.Columns.Add("lowestPrice", typeof(double));
+                dt.Columns.Add("closePrice", typeof(double));
+                dt.Columns.Add("spread", typeof(double));
 
-                //JSON反序列化裝入刻好的物件，傳入controller
-                stockDataAPI = JsonConvert.DeserializeObject<stockDataAPI>(jsonString);
-
-                if (stockDataAPI.stat.Contains("OK"))
+                if (stockDataAPI.data9 == null)
+                    stockDataAPI.data9 = stockDataAPI.data8;
+                foreach (var item in stockDataAPI.data9)
                 {
-                    stockDataTmp stockData = new stockDataTmp();
+                    DataRow row = dt.NewRow();
+                    if (item[5].Contains("--") || item[5] == "0.00")
+                        continue;
+                    //insert row data
+                    row["code"] = item[0];
+                    row["dataDate"] = date;
+                    row["shares"] = Math.Floor(Convert.ToDouble(item[2].Replace(",", "")) / 1000);
+                    row["turnover"] = Math.Round(Convert.ToDouble(item[4].Replace(",", "")) / 1000000, 4);
+                    row["openPrice"] = Convert.ToDouble(item[5].Replace(",", ""));
+                    row["highestPrice"] = Convert.ToDouble(item[6].Replace(",", ""));
+                    row["lowestPrice"] = Convert.ToDouble(item[7].Replace(",", ""));
+                    row["closePrice"] = Convert.ToDouble(item[8].Replace(",", ""));
+                    
+                    if (item[9].Contains("+") || item[9].Contains(" "))
+                        row["spread"] = Convert.ToDouble(item[10]) * 1;
+                    if (item[9].Contains("-"))
+                        row["spread"] = Convert.ToDouble(item[10]) * -1;
+                     
+                    dt.Rows.Add(row);
+                }
 
-                    string truncatesql = "truncate table stockDataTmp";
-                    db.Database.ExecuteSqlCommand(truncatesql);
-                    db.SaveChanges();
-                    if (stockDataAPI.data9 == null)
-                        stockDataAPI.data9 = stockDataAPI.data8;
-                    foreach (var item in stockDataAPI.data9)
+                using (var db = new WebStockEntities())
+                {
+                    //清空資料暫存Table
+                    db.Database.ExecuteSqlCommand(@"truncate table stockDataTmp");
+
+                    //sqlBulkCopy 寫入資料Table
+                    SqlConnection conn = (SqlConnection)db.Database.Connection;
+                    if (conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    using (var sqlBulkCopy = new SqlBulkCopy((SqlConnection)db.Database.Connection))
                     {
-                        if (item[5].Contains("--") || item[5] == "0.00")
-                            continue;
-                        stockData.code = item[0];
-                        stockData.dataDate = Convert.ToDateTime(date);
-                        stockData.shares = Convert.ToInt32(item[2].Replace(",", "")) / 1000;
-                        stockData.turnover = Math.Round(Convert.ToDouble(item[4].Replace(",", "")) / 1000000, 3);
-                        stockData.openPrice = Convert.ToDouble(item[5].Replace(",", ""));
-                        stockData.highestPrice = Convert.ToDouble(item[6].Replace(",", ""));
-                        stockData.lowestPrice = Convert.ToDouble(item[7].Replace(",", ""));
-                        stockData.closePrice = Convert.ToDouble(item[8].Replace(",", ""));
-
-                        if (item[9].Contains("+") || item[9].Contains(" "))
-                            stockData.spread = Convert.ToDouble(item[10]) * 1;
-                        if (item[9].Contains("-"))
-                            stockData.spread = Convert.ToDouble(item[10]) * -1;
-                        //寫入DB
-                        db.stockDataTmp.Add(stockData);
-                        db.SaveChanges();
-
+                        sqlBulkCopy.DestinationTableName = "dbo.stockDataTmp";
+                        sqlBulkCopy.WriteToServer(dt);
                     }
 
-                    string strSql = @"insert into stockData (
-                                code,
-                                dataDate,
-                                shares,
-                                turnover,
-                                openPrice,
-                                highestPrice,
-                                lowestPrice,
-                                closePrice,
-                                spread
-                                )
-                                
-                                select 
-                                
-                                b.code,
-                                b.dataDate,
-                                b.shares,
-                                b.turnover,
-                                b.openPrice,
-                                b.highestPrice,
-                                b.lowestPrice,
-                                b.closePrice,
-                                b.spread
-                                
-                                from stockIndex a
-                                join stockDataTmp b
-                                on a.code = b.code
-                                left join stockData c
-                                on b.code = c.code and b.dataDate = c.dataDate
-                                where a.type LIKE '上市' and c.code is NULL;
-                                select @@ROWCOUNT
-                                ";
+                    string strSql = @"INSERT INTO [dbo].[stockData]  
+                                     (code,		
+                                     dataDate,	
+                                     shares,		
+                                     turnover,	
+                                     openPrice,
+                                     highestPrice,
+                                     lowestPrice,	
+                                     closePrice,
+                                     spread)
+                                    
+                                    SELECT 
+                                     b.code, 
+                                     b.dataDate,	
+                                     b.shares,	
+                                     b.turnover,	
+                                     b.openPrice,
+                                     b.highestPrice,
+                                     b.lowestPrice,
+                                     b.closePrice,
+                                     b.spread
+                                    FROM stockIndex a
+                                    JOIN stockDataTmp b
+                                    ON a.code = b.code
+                                    LEFT JOIN stockData c
+                                    ON b.code = c.code AND b.dataDate = c.dataDate
+                                    WHERE a.type LIKE '上市' AND  c.code is NULL;
+                                     
+                                    Select @@ROWCOUNT;
+                                    ";
 
                     rescount = db.Database.ExecuteSqlCommand(strSql);
-                    string logtype = "DownloadStock";
-                    string message = $"queryDate : {date}, result : 寫入成功, count : {rescount}";
-                    sysLog log = sysModel.createLog(logtype, message);
-
-                    result = $"queryDate : {log.date}, result : {log.message}";
-                }
-                else
-                {
-                    string logtype = "DownloadStock";
-                    string message = $"queryDate : {date}, result : 無資料, count : {rescount}";
-                    sysLog log = sysModel.createLog(logtype, message);
-
-                    result = $"queryDate : {log.date}, result : {log.message}";
                 }
 
-                return result;
+                string logtype = "DownloadStock";
+                string message = $"queryDate : {date}, result : 寫入成功, count : {rescount}";
+                sysLog log = sysModel.createLog(logtype, message);
 
+                result = $"queryDate : {log.date}, result : {log.message}";
+            }
+            else
+            {
+                string logtype = "DownloadStock";
+                string message = $"queryDate : {date}, result : 無資料, count : {rescount}";
+                sysLog log = sysModel.createLog(logtype, message);
+
+                result = $"queryDate : {log.date}, result : {log.message}";
 
             }
+            return result;
+
         }
 
         internal async Task<string> DownloadOtc(string date)
@@ -132,46 +155,66 @@ namespace WebStock.Models
                 if (OtcDataAPI.iTotalRecords != "0")
                 {
                     stockDataTmpOtc OtcData = new stockDataTmpOtc();
-                    string truncatesql = "truncate table stockDataTmpOtc";
-                    db.Database.ExecuteSqlCommand(truncatesql);
-                    db.SaveChanges();
+                    
+                    //init bulkcopy
+                    DataTable dt = new DataTable();
+                    dt.Columns.Add("id", typeof(Int64));
+                    dt.Columns.Add("code", typeof(string));
+                    dt.Columns.Add("dataDate", typeof(DateTime));
+                    dt.Columns.Add("shares", typeof(Int64));
+                    dt.Columns.Add("turnover", typeof(double));
+                    dt.Columns.Add("openPrice", typeof(double));
+                    dt.Columns.Add("highestPrice", typeof(double));
+                    dt.Columns.Add("lowestPrice", typeof(double));
+                    dt.Columns.Add("closePrice", typeof(double));
+                    dt.Columns.Add("spread", typeof(double));
 
                     foreach (var item in OtcDataAPI.aaData)
                     {
+                        DataRow row = dt.NewRow();
                         if (item[2].Contains("---") || item[3].Contains("---"))
                             continue;
-                        OtcData.code = item[0];
-                        OtcData.dataDate = Convert.ToDateTime(westdatetime);
-                        OtcData.shares = Convert.ToInt32(item[8].Replace(",", "")) / 1000;
-                        OtcData.turnover = Math.Round(Convert.ToDouble(item[9].Replace(",", "")) / 1000000, 3);
-                        OtcData.openPrice = Convert.ToDouble(item[4].Replace(",", ""));
-                        OtcData.highestPrice = Convert.ToDouble(item[5].Replace(",", ""));
-                        OtcData.lowestPrice = Convert.ToDouble(item[6].Replace(",", ""));
-                        OtcData.closePrice = Convert.ToDouble(item[2].Replace(",", ""));
+                        row["code"] = item[0];
+                        row["dataDate"] = Convert.ToDateTime(westdatetime);
+                        row["shares"] = Convert.ToInt32(item[8].Replace(",", "")) / 1000;
+                        row["turnover"] = Math.Round(Convert.ToDouble(item[9].Replace(",", "")) / 1000000, 3);
+                        row["openPrice"] = Convert.ToDouble(item[4].Replace(",", ""));
+                        row["highestPrice"] = Convert.ToDouble(item[5].Replace(",", ""));
+                        row["lowestPrice"] = Convert.ToDouble(item[6].Replace(",", ""));
+                        row["closePrice"] = Convert.ToDouble(item[2].Replace(",", ""));
                         if (item[3].Contains("+") || item[3] == "0.00 ")
                         {
                             if (item[3].Contains("#"))
                             {
                                 item[3] = "0";
-                                OtcData.spread = Convert.ToDouble(item[3]);
+                                row["spread"] = Convert.ToDouble(item[3]);
                             }
                             else
-                                OtcData.spread = Convert.ToDouble(item[3]);
+                                row["spread"] = Convert.ToDouble(item[3]);
                         }
                         else if (item[3].Contains("-"))
-                            OtcData.spread = Convert.ToDouble(item[3].Replace("-", "")) * -1;
+                            row["spread"] = Convert.ToDouble(item[3].Replace("-", "")) * -1;
                         else if (item[3].Contains("除"))
                         {
                             item[3] = "0";
-                            OtcData.spread = Convert.ToDouble(item[3]);
+                            row["spread"] = Convert.ToDouble(item[3]);
                         }
                         else
-                            OtcData.spread = Convert.ToDouble(item[3]);
+                            row["spread"] = Convert.ToDouble(item[3]);
+                    }
 
-                        //寫入DB
-                        db.stockDataTmpOtc.Add(OtcData);
-                        db.SaveChanges();
+                    //清空資料暫存Table
+                    db.Database.ExecuteSqlCommand(@"truncate table stockDataTmpOtc");
 
+                    //sqlBulkCopy 寫入資料Table
+                    SqlConnection conn = (SqlConnection)db.Database.Connection;
+                    if (conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    using (var sqlBulkCopy = new SqlBulkCopy((SqlConnection)db.Database.Connection))
+                    {
+                        sqlBulkCopy.DestinationTableName = "dbo.stockDataTmpOtc";
+                        sqlBulkCopy.WriteToServer(dt);
                     }
 
                     string strSql = @"insert into stockData (

@@ -11,7 +11,6 @@ namespace WebStock.Controllers
 {
     public class stockMemoController : BaseController
     {
-        CommonModel commonModel = new CommonModel();
         ReportModel reportModel = new ReportModel();
         // GET: stockMemo
         public ActionResult stockMemo()
