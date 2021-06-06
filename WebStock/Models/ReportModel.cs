@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
@@ -49,7 +50,7 @@ namespace WebStock.Models
 
                 string sortStr = "ORDER BY ";
                 string sortDESC = (form.options.sortDesc != null && form.options.sortDesc[0]) ? "DESC" : "ASC";
-                string pageStr = "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
+                string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
 
 
                 string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
@@ -118,7 +119,7 @@ namespace WebStock.Models
 
                 string sortStr = "ORDER BY ";
                 string sortDESC = (form.options.sortDesc != null && form.options.sortDesc[0]) ? "DESC" : "ASC";
-                string pageStr = "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
+                string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
 
                 string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
                 switch (sortByType)
@@ -135,7 +136,6 @@ namespace WebStock.Models
                     case "closePrice": sortStr += "a.closePrice"; break;
                     default: sortStr += "a.dataDate"; break;
                 }
-
 
                 string strSql = string.Format(strSqlTmp, sortStr, sortDESC, pageStr);
 
@@ -191,12 +191,13 @@ namespace WebStock.Models
                 {
                     strSqlTmp += @" WHERE i.type LIKE '%'+ @type +'%' AND a.avgShares >= @shares AND n.position <= @position AND
                                     n.closePrice >= @closePrice {0} {1} {2} ";
-                    string sortStr = "ORDER BY ";
-                    string sortDESCbool = form.options.sortDescBool ? "DESC" : "ASC";
-                    string pageStr = "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
 
-                    string sortByStrType = form.options.sortByStr != null ? form.options.sortByStr : "";
-                    switch (sortByStrType)
+                    string sortStr = "ORDER BY ";
+                    string sortDESC = (form.options.sortDesc != null && form.options.sortDesc[0]) ? "DESC" : "ASC";
+                    string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
+
+                    string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
+                    switch (sortByType)
                     {
                         case "position": sortStr += "n.position"; break;
                         case "category": sortStr += "i.category"; break;
@@ -208,7 +209,7 @@ namespace WebStock.Models
                         default: sortStr += "i.dataDate"; break;
                     }
 
-                    string strSql = string.Format(strSqlTmp, sortStr, sortDESCbool, pageStr);
+                    string strSql = string.Format(strSqlTmp, sortStr, sortDESC, pageStr);
 
                     List<RSS> datas = db.Database.SqlQuery<RSS>(strSql,
                         new SqlParameter("@type", form.type),
@@ -237,7 +238,7 @@ namespace WebStock.Models
 
                 }
             }
-            
+
         }
 
         internal string addFavorite(string code, int OperId)
@@ -254,7 +255,7 @@ namespace WebStock.Models
             }
         }
 
-        internal List<RSF> ReadStockFavorite(FormSearch form,int operId)
+        internal List<RSF> ReadStockFavorite(FormSearch form, int operId)
         {
             List<RSF> favorites = new List<RSF>();
             using (var db = new WebStockEntities())
@@ -286,8 +287,10 @@ namespace WebStock.Models
                                ON f.code = m.code
                                WHERE f.operId = @operId
                                ORDER BY i.code
-                               OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
-                favorites = db.Database.SqlQuery<RSF>(sql,
+                               {0}";
+                string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
+                string strsql = string.Format(sql, pageStr);
+                favorites = db.Database.SqlQuery<RSF>(strsql,
                             new SqlParameter("@operId", operId),
                             new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
                             new SqlParameter("@FETCH", form.options.itemsPerPage)).ToList();
@@ -372,9 +375,10 @@ namespace WebStock.Models
                             JOIN stockProfit p
                             	ON i.code = p.code
                             WHERE p.operId = @operId
-                            ORDER BY i.code
-                            OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY";
-                stockInventoryProfits = db.Database.SqlQuery<RSP>(sql,
+                            ORDER BY i.code";
+                string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
+                string strsql = string.Format(sql, pageStr);
+                stockInventoryProfits = db.Database.SqlQuery<RSP>(strsql,
                                            new SqlParameter("@operId", operId),
                                            new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
                                            new SqlParameter("@FETCH", form.options.itemsPerPage)).ToList();
@@ -444,66 +448,122 @@ namespace WebStock.Models
         {
             if (string.IsNullOrEmpty(data.memoContent))
                 return "新增失敗，請輸入memo內容";
-            string sqlCreate = @"INSERT INTO stockMemo ( code, ext1, ext2, ext3, ext4, ext5, 
-                                 ext6, ext7, ext8, ext9, ext10, ext11, ext12, ext13, ext14, ext15, ext16) VALUES (
-                                 @code, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '')";
-
+            
+            string sql = "select * from stockMemo";
             string[] stringSeparators = new string[] { "\r\n" };
             string[] codeArray = data.stockMemo.code.Split(stringSeparators, StringSplitOptions.None);
             using (var db = new WebStockEntities())
             {
+                List<stockMemo> memos = db.Database.SqlQuery<stockMemo>(sql).ToList();
+
+                //buckCopy Init
+                DataTable dt = new DataTable();
+                dt.Columns.Add("id", typeof(Int64));
+                dt.Columns.Add("code", typeof(string));
+                dt.Columns.Add("ext1", typeof(string));
+                dt.Columns.Add("ext2", typeof(string));
+                dt.Columns.Add("ext3", typeof(string));
+                dt.Columns.Add("ext4", typeof(string));
+                dt.Columns.Add("ext5", typeof(string));
+                dt.Columns.Add("ext6", typeof(string));
+                dt.Columns.Add("ext7", typeof(string));
+                dt.Columns.Add("ext8", typeof(string));
+                dt.Columns.Add("ext9", typeof(string));
+                dt.Columns.Add("ext10", typeof(string));
+                dt.Columns.Add("ext11", typeof(string));
+                dt.Columns.Add("ext12", typeof(string));
+                dt.Columns.Add("ext13", typeof(string));
+                dt.Columns.Add("ext14", typeof(string));
+                dt.Columns.Add("ext15", typeof(string));
+                dt.Columns.Add("ext16", typeof(string));
+                foreach (var item in db.stockIndex.ToList())
+                {
+                    DataRow row = dt.NewRow();
+                    row["code"] = item.code;
+                    row["ext1"] = "";
+                    row["ext2"] = "";
+                    row["ext3"] = "";
+                    row["ext4"] = "";
+                    row["ext5"] = "";
+                    row["ext6"] = "";
+                    row["ext7"] = "";
+                    row["ext8"] = "";
+                    row["ext9"] = "";
+                    row["ext10"] = "";
+                    row["ext11"] = "";
+                    row["ext12"] = "";
+                    row["ext13"] = "";
+                    row["ext14"] = "";
+                    row["ext15"] = "";
+                    row["ext16"] = "";
+                    dt.Rows.Add(row);
+                }
+                db.Database.ExecuteSqlCommand(@"truncate table stockMemo");
+                
+                foreach (DataRow dr in dt.Rows)
+                {
+                    foreach (var item in memos)
+                    {
+                        if(dr["code"].ToString() == item.code)
+                        {
+                            dr["ext1"] = item.ext1;
+                            dr["ext2"] = item.ext2;
+                            dr["ext3"] = item.ext3;
+                            dr["ext4"] = item.ext4;
+                            dr["ext5"] = item.ext5;
+                            dr["ext6"] = item.ext6;
+                            dr["ext7"] = item.ext7;
+                            dr["ext8"] = item.ext8;
+                            dr["ext9"] = item.ext9;
+                            dr["ext10"] = item.ext10;
+                            dr["ext11"] = item.ext11;
+                            dr["ext12"] = item.ext12;
+                            dr["ext13"] = item.ext13;
+                            dr["ext14"] = item.ext14;
+                            dr["ext15"] = item.ext15;
+                            dr["ext16"] = item.ext16;
+                        }
+                    }
+                }
+
                 foreach (var code in codeArray)
                 {
-                    stockMemo stockMemo = db.stockMemo.Where(x => x.code == code).FirstOrDefault();
-                    if (stockMemo != null)
+                    foreach(DataRow dr in dt.Rows)
                     {
-                        switch (data.type)
+                        if (dr["code"].ToString() == code)
                         {
-                            case "ext1":
-                                stockMemo.ext1 = data.memoContent; break;
-                            case "ext2":
-                                stockMemo.ext2 = data.memoContent; break;
-                            case "ext3":
-                                stockMemo.ext3 = data.memoContent; break;
-                            case "ext4":
-                                stockMemo.ext4 = data.memoContent; break;
-                            case "ext5":
-                                stockMemo.ext5 = data.memoContent; break;
-                            case "ext6":
-                                stockMemo.ext6 = data.memoContent; break;
-                            case "ext7":
-                                stockMemo.ext7 = data.memoContent; break;
-                            default: break;
+                            switch (data.type)
+                            {
+                                case "ext1":
+                                    dr["ext1"] = data.memoContent; break;
+                                case "ext2":
+                                    dr["ext2"] = data.memoContent; break;
+                                case "ext3":
+                                    dr["ext3"] = data.memoContent; break;
+                                case "ext4":
+                                    dr["ext4"] = data.memoContent; break;
+                                case "ext5":
+                                    dr["ext5"] = data.memoContent; break;
+                                case "ext6":
+                                    dr["ext6"] = data.memoContent; break;
+                                case "ext7":
+                                    dr["ext7"] = data.memoContent; break;
+                                default: break;
+                            }
                         }
-                        db.SaveChanges();
                     }
-                    else
-                    {
-                        int result = db.Database.ExecuteSqlCommand(sqlCreate,
-                            new SqlParameter("@code", code));
-                        stockMemo memo = db.stockMemo.Where(x => x.code == code).FirstOrDefault();
-                        switch (data.type)
-                        {
-                            case "ext1":
-                                memo.ext1 = data.memoContent; break;
-                            case "ext2":
-                                memo.ext2 = data.memoContent; break;
-                            case "ext3":
-                                memo.ext3 = data.memoContent; break;
-                            case "ext4":
-                                memo.ext4 = data.memoContent; break;
-                            case "ext5":
-                                memo.ext5 = data.memoContent; break;
-                            case "ext6":
-                                memo.ext6 = data.memoContent; break;
-                            case "ext7":
-                                memo.ext7 = data.memoContent; break;
-                            default: break;
-                        }
-                        db.SaveChanges();
-                    }
-
                 }
+                //sqlBulkCopy 寫入資料Table
+                SqlConnection conn = (SqlConnection)db.Database.Connection;
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+
+                using (var sqlBulkCopy = new SqlBulkCopy((SqlConnection)db.Database.Connection))
+                {
+                    sqlBulkCopy.DestinationTableName = "dbo.stockMemo";
+                    sqlBulkCopy.WriteToServer(dt);
+                }
+                
             }
             return "新增成功";
         }

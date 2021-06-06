@@ -10,6 +10,11 @@ namespace WebStock.ViewModels
     {
         public class FormSearch
         {
+            public FormSearch()
+            {
+                Options o = new Options();
+                options = o;
+            }
             public int operId { get; set; }
             public string type { get; set; }
             public string code { get; set; }

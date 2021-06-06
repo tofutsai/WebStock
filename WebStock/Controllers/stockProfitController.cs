@@ -18,9 +18,6 @@ namespace WebStock.Controllers
             StockProfitView stockProfitView = new StockProfitView();
             //預設查詢條件
             FormSearch form = new FormSearch();
-            form.options = new Options();
-            form.options.page = 1;
-            form.options.itemsPerPage = 9999;
             stockProfitView.formSearch = form;
             stockProfitView.data = reportModel.ReadStockProfit(form,UserInfo.OperId);
             return View(stockProfitView);
