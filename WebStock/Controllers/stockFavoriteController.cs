@@ -17,26 +17,30 @@ namespace WebStock.Controllers
         {
             StockFavoriteView stockFavoriteView = new StockFavoriteView();
             FormSearch form = new FormSearch();
+            form.operId = UserInfo.OperId;
             stockFavoriteView.formSearch = form;
-            stockFavoriteView.data = reportModel.ReadStockFavorite(form,UserInfo.OperId);
+            stockFavoriteView.data = reportModel.ReadStockFavorite(form);
             return View(stockFavoriteView);
         }
 
         public string CreateFavoriteStock(string code)
         {
             string msg = reportModel.createFavoriteStock(code, UserInfo.OperId);
+            msg = msg != "02" ? msg != "03" ? "新增成功" : "無須新增" : "新增失敗";
             return msg;
         }
 
-        public string UpdateStockMemo(stockFavorite favorite)
+        public string UpdateFavoriteStockMemo(stockFavorite favorite)
         {
-            string msg = reportModel.updateStockMemo(favorite, UserInfo.OperId);
+            bool status = reportModel.updateFavoriteStockMemo(favorite);
+            string msg = status ? "自行備註編輯成功" : "自行備註編輯失敗"; 
             return msg;
         }
 
-        public string DeleteFavoriteStock(string code)
+        public string DeleteFavoriteStock(int id)
         {
-            string msg = reportModel.deleteFavoriteStock(code, UserInfo.OperId);
+            bool status = reportModel.deleteFavoriteStock(id);
+            string msg = status ? "刪除成功" : "刪除失敗";
             return msg;
         }
 

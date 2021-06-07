@@ -60,11 +60,11 @@ namespace WebStock.Models
                     row["lowestPrice"] = Convert.ToDouble(item[7].Replace(",", ""));
                     row["closePrice"] = Convert.ToDouble(item[8].Replace(",", ""));
                     
-                    if (item[9].Contains("+") || item[9].Contains(" "))
+                    if (item[9].Contains("+") || item[9].Contains(" ") || item[9].Contains("X"))
                         row["spread"] = Convert.ToDouble(item[10]) * 1;
                     if (item[9].Contains("-"))
                         row["spread"] = Convert.ToDouble(item[10]) * -1;
-                     
+                                         
                     dt.Rows.Add(row);
                 }
 
@@ -201,6 +201,8 @@ namespace WebStock.Models
                         }
                         else
                             row["spread"] = Convert.ToDouble(item[3]);
+
+                        dt.Rows.Add(row);
                     }
 
                     //清空資料暫存Table

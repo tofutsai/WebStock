@@ -55,9 +55,9 @@
     <input id="sharesInput" type="text" name="buyShares" value="" placeholder="購買股數" style="width:100px;" />
     <span onclick="Create()" style="color:blue;cursor:pointer">新增庫存</span>
 </p>
-<b>總成本 : </b><span style="font-weight: bold;color: blue">@Model.data.Sum(x => int.Parse(x.buyCost, NumberStyles.AllowThousands)).ToString("###,###")</span>&nbsp;&nbsp;
+<b>總成本 : </b><span style="font-weight: bold;color: blue">@Model.data.Sum(x => x.buyCost).ToString("###,###")</span>&nbsp;&nbsp;
 @{
-    string totalProfit = Model.data.Sum(x => int.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign)).ToString("###,###");
+    string totalProfit = Model.data.Sum(x => x.profit).ToString("###,###");
     if (totalProfit.Contains("-"))
     {
         <b>總損益 : </b><span style="font-weight: bold;color:#00BB00">@totalProfit</span><span>&nbsp;&nbsp;</span>
@@ -67,8 +67,8 @@
         <b>總損益 : </b><span style="font-weight: bold;color:#FF0000">@totalProfit</span><span>&nbsp;&nbsp;</span>
     }
     const int percentage = 100;
-    double totalCost = Model.data.Sum(x => double.Parse(x.buyCost, NumberStyles.AllowThousands));
-    double totalprofit = Model.data.Sum(x => double.Parse(x.profit, NumberStyles.AllowThousands | NumberStyles.AllowLeadingSign));
+    double totalCost = Model.data.Sum(x => x.buyCost);
+    double totalprofit = Model.data.Sum(x => x.profit);
     double totalProfitPercentage = Math.Round(totalprofit / totalCost * percentage, 2);
     if (Double.NaN.Equals(totalProfitPercentage))
     {
@@ -135,8 +135,7 @@
             </td>
             <td>
                 @{
-                    int buyshares = int.Parse(item.buyShares);
-                    <div>@buyshares.ToString("###,###")</div>
+                    <div>@String.Format("{0:N0}", item.buyShares)</div>
                 }
             </td>
             <td>
@@ -144,13 +143,17 @@
             </td>
             <td>
                 @{
-                    if (item.profit.Contains("-"))
+                    if (item.profit < 0)
                     {
-                        <div class="level-l">@item.profit</div>
+                        <div class="level-l">
+                            @String.Format("{0:N0}", item.profit)
+                        </div>
                     }
                     else
                     {
-                        <div class="level-h">@item.profit</div>
+                        <div class="level-h">
+                            @String.Format("{0:N0}", item.profit)
+                        </div>
                     }
                 }
             </td>
@@ -158,11 +161,15 @@
                 @{
                     if (item.profitPercentage < 0)
                     {
-                        <div class="level-l">@item.profitPercentage.ToString()%</div>
+                        <div class="level-l">
+                            @String.Format("{0:N2}", item.profitPercentage)%
+                        </div>
                     }
                     else
                     {
-                        <div class="level-h">@item.profitPercentage.ToString()%</div>
+                        <div class="level-h">
+                            @String.Format("{0:N2}", item.profitPercentage)%
+                        </div>
                     }
                 }
 
@@ -205,7 +212,7 @@
     function Delete(id, code) {
         var yes = confirm("確定刪除庫存:  " + code + " 嗎?");
         if (yes) {
-            var data = {id: id, code: code };
+            var data = {id: id };
             $.ajax({
             type: "POST",
             url: "@Url.Action("deleteStockInventory")",

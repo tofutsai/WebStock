@@ -21,8 +21,8 @@ namespace WebStock.Controllers
         [HttpPost]
         public ActionResult stockMemo(stockMemoView data)
         {
-            string result = reportModel.addStockMemo(data);
-            ViewBag.Message = result;
+            bool status= reportModel.addStockMemo(data.type, data.codes, data.memoContent);
+            ViewBag.Message = status ? "新增成功":"新增失敗";
             return View();
         }
     }

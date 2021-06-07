@@ -11,14 +11,22 @@ namespace WebStock.Models
         private WebStockEntities db = new WebStockEntities();
         CommonModel CommonModel = new CommonModel();
 
-        internal int Register(member formData)
+        internal string Register(member formData)
         {
-            string strPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(formData.password, "SHA1");
-            formData.password = strPassword;
-            formData.role = "user";
-            db.member.Add(formData);
-
-            return db.SaveChanges();
+            var check = db.member.Where(x => x.account == formData.account).FirstOrDefault();
+            if (check == null)
+            {
+                string strPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(formData.password, "SHA1");
+                formData.password = strPassword;
+                formData.role = "user";
+                db.member.Add(formData);
+                int r = db.SaveChanges();
+                return r > 0 ? "01" : "02";
+            }
+            else
+            {
+                return "03";
+            }
         }
 
         internal member Login(member formData)
