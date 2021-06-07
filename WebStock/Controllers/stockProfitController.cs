@@ -18,20 +18,24 @@ namespace WebStock.Controllers
             StockProfitView stockProfitView = new StockProfitView();
             //預設查詢條件
             FormSearch form = new FormSearch();
+            form.operId = UserInfo.OperId;
             stockProfitView.formSearch = form;
-            stockProfitView.data = reportModel.ReadStockProfit(form,UserInfo.OperId);
+            stockProfitView.data = reportModel.ReadStockProfit(form);
             return View(stockProfitView);
         }
-                
+
         public string createStockInventory(stockProfit profit)
         {
-            string msg = reportModel.createStockInventory(profit, UserInfo.OperId);
+            profit.operId = UserInfo.OperId;
+            bool status = reportModel.createStockInventory(profit);
+            string msg = status ? "新增成功" : "新增失敗";
             return msg;
         }
 
         public string deleteStockInventory(stockProfit data)
         {
-            string msg = reportModel.deleteStockInventory(data, UserInfo.OperId);
+            bool status = reportModel.deleteStockInventory(data.id);
+            string msg = status ? "刪除成功" : "刪除失敗";
             return msg;
         }
     }

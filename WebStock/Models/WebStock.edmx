@@ -137,9 +137,9 @@
           <Property Name="code" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="operId" Type="int" Nullable="false" />
           <Property Name="buyPrice" Type="float" Nullable="false" />
-          <Property Name="buyShares" Type="nvarchar" MaxLength="10" Nullable="false" />
-          <Property Name="buyCost" Type="nvarchar" MaxLength="20" Nullable="false" />
-          <Property Name="profit" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="buyShares" Type="int" Nullable="false" />
+          <Property Name="buyCost" Type="float" Nullable="false" />
+          <Property Name="profit" Type="float" Nullable="false" />
           <Property Name="profitPercentage" Type="float" Nullable="false" />
         </EntityType>
         <EntityType Name="sysConfig">
@@ -346,9 +346,9 @@
           <Property Name="code" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
           <Property Name="operId" Type="Int32" Nullable="false" />
           <Property Name="buyPrice" Type="Double" Nullable="false" />
-          <Property Name="buyShares" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
-          <Property Name="buyCost" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="true" />
-          <Property Name="profit" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="buyShares" Type="Int32" Nullable="false" />
+          <Property Name="buyCost" Type="Double" Nullable="false" />
+          <Property Name="profit" Type="Double" Nullable="false" />
           <Property Name="profitPercentage" Type="Double" Nullable="false" />
         </EntityType>
         </Schema>

@@ -161,7 +161,7 @@
                 @Html.DisplayFor(model => item.category)
             </td>
             <td>
-                @Html.ActionLink(item.code, "", new { }, new { href = "https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID=" + item.code })
+                @Html.ActionLink(item.code, "", new { }, new { href = "https://goodinfo.tw/StockInfo/StockBzPerformance.asp?STOCK_ID=" + item.code, target = "_blank" })
                 &nbsp;
                 <span onClick="Create(@item.code)" title="加入自選" style="color:red;cursor:pointer">❤</span>
             </td>

@@ -36,7 +36,13 @@ namespace WebStock.Controllers
                 return RedirectToAction("Index", "Home");
             else
             {
-                LoginModel.Register(formData);
+                string msg = LoginModel.Register(formData);
+                if(msg == "02" || msg == "03")
+                {
+                    ModelState.Clear();
+                    ModelState.AddModelError("account", "您輸入的帳號已被註冊 !");
+                    return View();
+                }
                 return RedirectToAction("Login", "Login");
             }
         }

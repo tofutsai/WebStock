@@ -104,7 +104,17 @@ namespace WebStock.ViewModels
         {
             public string type { get; set; }
             public string memoContent { get; set; }
-            public stockMemo stockMemo { get; set; }
+            public string codes { get; set; }
+        }
+
+        public class stockConfigView
+        {
+            public List<RSC> data { get; set; }
+        }
+
+        public class RSC : sysConfig
+        {
+           public int totalCount { get; set; }
         }
     }
 

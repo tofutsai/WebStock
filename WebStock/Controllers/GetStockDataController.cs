@@ -15,7 +15,7 @@ namespace WebStock.Controllers
 {
     public class GetStockDataController : BaseController
     {
-        ReportModel ReportModel = new ReportModel();
+        ReportModel reportModel = new ReportModel();
         // GET: GetStockData
         public ActionResult Index()
         {
@@ -85,14 +85,14 @@ namespace WebStock.Controllers
         [HttpPost]
         public ActionResult computeStockAvg()
         {
-            commonModel.stockAvgStatistics();
+            reportModel.stockAvgStatistics();
             return RedirectToAction("Index", "GetStockData");
         }
 
         [HttpPost]
         public ActionResult computeStockNow()
         {
-            commonModel.stockNowsStatistics();
+            reportModel.stockNowsStatistics();
             return RedirectToAction("Index", "GetStockData");
         }
 
@@ -108,7 +108,7 @@ namespace WebStock.Controllers
 
         public string sysConfigAjax(sysConfig sys)
         {
-            string msg = commonModel.sysConfigUpdate(sys);
+            string msg = reportModel.sysConfigUpdate(sys);
             return msg;
         }
 
@@ -131,7 +131,7 @@ namespace WebStock.Controllers
             form.options.sortBy = new string[] { "dataDate" };
             form.options.sortDesc = new bool[] { true };
             StockDataView StockDataView = new StockDataView();
-            StockDataView.data = ReportModel.ReadStockData(form);
+            StockDataView.data = reportModel.ReadStockData(form);
             return View(StockDataView);
         }
     }
