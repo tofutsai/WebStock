@@ -17,11 +17,11 @@ namespace WebStock.Controllers
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
 
-            var headder = filterContext.HttpContext.Request.Headers["Content-Language"];
+            var header = filterContext.HttpContext.Request.Headers["Content-Language"];
 
-            if (!string.IsNullOrEmpty(headder))
+            if (!string.IsNullOrEmpty(header))
             {
-                UserInfo = DecodeJWTToken(headder) as UserInfo;
+                UserInfo = DecodeJWTToken(header) as UserInfo;
 
             }
             else

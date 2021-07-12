@@ -61,6 +61,8 @@ namespace WebStock.Controllers
         [HttpPost]
         public ActionResult Login(member formData, FormCollection form)
         {
+            GoogleReCaptcha googleReCaptcha = new GoogleReCaptcha();
+            bool status = googleReCaptcha.ReCaptchaPassed(form["g-recaptcha-response"]);
             if (User.Identity.IsAuthenticated)
                 return RedirectToAction("Index", "Home");
             else
@@ -68,6 +70,11 @@ namespace WebStock.Controllers
                 member member = LoginModel.Login(formData);
                 if (member != null)
                 {
+                    if (!status)
+                    {
+                        ModelState.AddModelError("Password", "You failed the CAPTCHA.");
+                        return View();
+                    }
                     LoginModel.LoginSetting(member);
                     return RedirectToAction("Index", "Home");
                 }

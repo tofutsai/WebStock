@@ -72,6 +72,7 @@ namespace WebStock.ViewModels
             public string category { get; set; }
             public double position { get; set; }
             public double closePrice { get; set; }
+            public DateTime dataDate { get; set; }
             public string memo { get; set; }
             public int totalCount { get; set; }
 
@@ -98,6 +99,7 @@ namespace WebStock.ViewModels
             public double position { get; set; }
             public double closePrice { get; set; }
             public int totalCount { get; set; }
+            public string memo { get; set; }
         }
 
         public class stockMemoView
@@ -116,6 +118,11 @@ namespace WebStock.ViewModels
         {
            public int totalCount { get; set; }
         }
+
+        public class RSL : sysLog 
+        {
+            public int totalCount { get; set; }
+        } 
     }
 
     

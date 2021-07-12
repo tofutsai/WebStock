@@ -44,9 +44,13 @@ namespace WebStock.Models
                 else
                 {
                     whereStr = @"
+                                a.type LIKE '%'+ @type +'%'
+                                AND
+                                (
                                 a.code LIKE @code
                                 OR
                                 a.company LIKE @code
+                                )
                                 ";
                 }
 
@@ -80,6 +84,46 @@ namespace WebStock.Models
 
         }
 
+
+        internal bool CreateStockIndex(stockIndex stockIndex)
+        {
+            int status = 0;
+
+            using (var db = new WebStockEntities())
+            {
+                db.stockIndex.Add(stockIndex);
+                status = db.SaveChanges();
+                return status > 0 ? true : false;
+            }
+        }
+
+        internal bool UpdateStockIndex(stockIndex stockIndex)
+        {
+
+            int status = 0;
+            using (var db = new WebStockEntities())
+            {
+                var d = db.stockIndex.Where(x => x.id == stockIndex.id).FirstOrDefault();
+                Mapper.Initialize(cfg => cfg.CreateMap<stockIndex, stockIndex>()
+                                                  .ForMember(x => x.id, opt => opt.Ignore())
+                                                  );
+                Mapper.Map(stockIndex, d);
+                status = db.SaveChanges();
+            }
+            return status >= 0 ? true : false;
+        }
+
+        internal bool DeleteStockIndex(int id)
+        {
+            int status = 0;
+            using (var db = new WebStockEntities())
+            {
+                var d = db.stockIndex.Where(x => x.id == id).FirstOrDefault();
+                db.stockIndex.Remove(d);
+                status = db.SaveChanges();
+            }
+            return status > 0 ? true : false;
+        }
         internal List<RSD> ReadStockData(FormSearch form)
         {
             using (var db = new WebStockEntities())
@@ -172,6 +216,7 @@ namespace WebStock.Models
                                    ,a.lowestPrice 
                                    ,n.closePrice 
                                    ,n.position
+                                   ,n.dataDate
                                    ,ISNULL(
 	                                m.ext1 + ',' +
 	                                m.ext2 + ',' +
@@ -201,6 +246,9 @@ namespace WebStock.Models
                     string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
                     switch (sortByType)
                     {
+                        case "type": sortStr += "i.type"; break;
+                        case "code": sortStr += "i.code"; break;
+                        case "company": sortStr += "i.company"; break;
                         case "position": sortStr += "n.position"; break;
                         case "category": sortStr += "i.category"; break;
                         case "avgShares": sortStr += "a.avgShares"; break;
@@ -289,10 +337,22 @@ namespace WebStock.Models
                                LEFT JOIN stockMemo m
                                ON f.code = m.code
                                WHERE f.operId = @operId
-                               ORDER BY i.code
-                               {0}";
+                               {0} {1} {2}";
+                string sortStr = "ORDER BY ";
+                string sortDESC = (form.options.sortDesc != null && form.options.sortDesc[0]) ? "DESC" : "ASC";
                 string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
-                string strsql = string.Format(sql, pageStr);
+                string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
+                switch (sortByType)
+                {
+                    case "type": sortStr += "i.type"; break;
+                    case "code": sortStr += "i.code"; break;
+                    case "company": sortStr += "i.company"; break;
+                    case "position": sortStr += "n.position"; break;
+                    case "category": sortStr += "i.category"; break;
+                    case "closePrice": sortStr += "n.closePrice"; break;
+                    default: sortStr += "i.code"; break;
+                }
+                string strsql = string.Format(sql, sortStr, sortDESC, pageStr);
                 favorites = db.Database.SqlQuery<RSF>(strsql,
                             new SqlParameter("@operId", form.operId),
                             new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
@@ -300,6 +360,7 @@ namespace WebStock.Models
             }
             return favorites;
         }
+
 
         internal string createFavoriteStock(string code, int operId)
         {
@@ -381,15 +442,42 @@ namespace WebStock.Models
                                ,p.buyCost
                                ,p.profit
                                ,p.profitPercentage
+                               ,ISNULL(
+                               	m.ext1 + ',' +
+                               	m.ext2 + ',' +
+                               	m.ext3 + ',' +
+                               	m.ext4 + ',' +
+                               	m.ext5 + ',' +
+                               	m.ext6 + ',' +
+                               	m.ext7
+                               	, '') AS memo
                             FROM stockIndex i
                             JOIN stockNow n
                             	ON i.code = n.code
                             JOIN stockProfit p
                             	ON i.code = p.code
+                            LEFT JOIN stockMemo m
+                               ON p.code = m.code
                             WHERE p.operId = @operId
-                            ORDER BY i.code";
+                            {0} {1} {2}";
+                string sortStr = "ORDER BY ";
+                string sortDESC = (form.options.sortDesc != null && form.options.sortDesc[0]) ? "DESC" : "ASC";
                 string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
-                string strsql = string.Format(sql, pageStr);
+                string sortByType = (form.options.sortBy != null && form.options.sortBy[0] != "") ? form.options.sortBy[0] : "";
+                switch (sortByType)
+                {
+                    case "code": sortStr += "i.code"; break;
+                    case "company": sortStr += "i.company"; break;
+                    case "position": sortStr += "n.position"; break;
+                    case "closePrice": sortStr += "n.closePrice"; break;
+                    case "buyPrice": sortStr += "p.buyPrice"; break;
+                    case "buyShares": sortStr += "p.buyShares"; break;
+                    case "buyCost": sortStr += "p.buyCost"; break;
+                    case "profit": sortStr += "p.profit"; break;
+                    case "profitPercentage": sortStr += "p.profitPercentage"; break;
+                    default: sortStr += "i.code"; break;
+                }
+                string strsql = string.Format(sql, sortStr, sortDESC, pageStr);
                 stockInventoryProfits = db.Database.SqlQuery<RSP>(strsql,
                                            new SqlParameter("@operId", form.operId),
                                            new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
@@ -408,7 +496,7 @@ namespace WebStock.Models
 
         internal bool createStockInventory(stockProfit profit)
         {
-            bool status = false; 
+            bool status = false;
             try
             {
                 using (var db = new WebStockEntities())
@@ -460,7 +548,7 @@ namespace WebStock.Models
             try
             {
                 string sql = "select * from stockMemo";
-                string[] stringSeparators = new string[] { "\r\n" };
+                string[] stringSeparators = new string[] { "\r\n", "\n" };
                 string[] codeArray = codes.Split(stringSeparators, StringSplitOptions.None);
                 using (var db = new WebStockEntities())
                 {
@@ -770,7 +858,7 @@ namespace WebStock.Models
             }
 
         }
-        internal List<RSC> getsysConfig()
+        internal List<RSC> ReadsysConfig()
         {
             List<RSC> data = new List<RSC>();
             using (var db = new WebStockEntities())
@@ -826,6 +914,33 @@ namespace WebStock.Models
                 int r = db.SaveChanges();
                 return r >= 0 ? true : false;
             }
+        }
+
+        internal List<RSL> ReadsysLog(FormSearch form)
+        {
+            List<RSL> data = new List<RSL>();
+            string datefrom = form.dataDate.ToString("yyyy-MM-dd");
+            string datenow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            using (var db = new WebStockEntities())
+            {
+                string sql = @"SELECT
+                               COUNT(1) OVER () AS totalCount
+                               ,*
+                               FROM sysLog AS s
+                               WHERE s.date BETWEEN @datefrom AND @datenow
+                               ORDER BY s.id DESC {0}"
+                               ;
+                string pageStr = (form.options.page != 0 && form.options.itemsPerPage != 0) ? "OFFSET @OFFSET ROWS FETCH NEXT @FETCH ROWS ONLY" : "";
+                string strsql = string.Format(sql, pageStr);
+                data = db.Database.SqlQuery<RSL>(strsql,
+                    new SqlParameter("@datefrom", datefrom),
+                    new SqlParameter("@datenow", datenow),
+                    new SqlParameter("@OFFSET", ((form.options.page - 1) * form.options.itemsPerPage)),
+                    new SqlParameter("@FETCH", form.options.itemsPerPage)
+                    ).ToList();
+            }
+
+            return data;
         }
     }
 }
