@@ -138,7 +138,7 @@ namespace WebStock.Controllers
             if (check)
             {
                 data = reportModel.ReadStockFavorite(form);
-                status = data.Count() > 0 ? true : false;
+                status = data != null ? true : false;
                 msg = status ? "查詢成功!" : "查詢失敗!";
             }
             else
@@ -152,7 +152,7 @@ namespace WebStock.Controllers
                 Success = status,
                 Message = msg,
                 Data = data,
-                TotalCount = status ? data.FirstOrDefault().totalCount : 0
+                TotalCount = status ? data.Count() : 0
             });
         }
 
@@ -171,8 +171,8 @@ namespace WebStock.Controllers
             if (check)
             {
                 data = reportModel.ReadStockProfit(form);
-                status = data.Count() > 0 ? true : false;
-                msg = status ? "查詢成功!" : "查詢失敗!";
+                status = data != null ? true : false;
+                msg = status ? "查詢成功!" : "查詢失敗";
             }
             else
             {
@@ -185,7 +185,7 @@ namespace WebStock.Controllers
                 Success = status,
                 Message = msg,
                 Data = data,
-                TotalCount = status ? data.FirstOrDefault().totalCount : 0
+                TotalCount = status ? data.Count() : 0
             });
         }
 
@@ -197,11 +197,40 @@ namespace WebStock.Controllers
             List<RSC> data = null;
             string msg = "";
 
-            data = reportModel.getsysConfig();
+            data = reportModel.ReadsysConfig();
             status = data.Count() > 0 ? true : false;
             msg = status ? "查詢成功!" : "查詢失敗!";
 
             return Json(new Results<List<RSC>>
+            {
+                Success = status,
+                Message = msg,
+                Data = data,
+                TotalCount = status ? data.FirstOrDefault().totalCount : 0
+            });
+
+        }
+
+        [HttpPost]
+        public JsonResult ReadSysLog(FormSearch form)
+        {
+            bool status = true;
+            List<RSL> data = null;
+            string msg = "";
+            bool check = true;
+
+            if (form.dataDate == DateTime.MinValue)
+            {
+                check = false;
+            }
+            if (check)
+            {
+                data = reportModel.ReadsysLog(form);
+                status = data.Count() > 0 ? true : false;
+                msg = status ? "查詢成功!" : "查詢失敗!";
+            }
+            
+            return Json(new Results<List<RSL>>
             {
                 Success = status,
                 Message = msg,
@@ -414,6 +443,101 @@ namespace WebStock.Controllers
             });
         }
 
+
+        public JsonResult CreateStockIndex(stockIndex form)
+        {
+            bool status = true;
+            bool check = true;
+            string msg = "";
+
+            if (string.IsNullOrEmpty(form.code))
+            {
+                check = false;
+            }
+
+            if (check)
+            {
+                status = reportModel.CreateStockIndex(form);
+                msg = status ? "新增成功!" : "新增失敗!";
+            }
+            else
+            {
+                status = false;
+                msg = "資料輸入錯誤!";
+            }
+
+            return Json(new Results<DBNull>
+            {
+                Success = status,
+                Message = msg,
+                Data = null,
+                TotalCount = status ? 1 : 0
+            });
+        }
+
+        public JsonResult EditStockIndex(stockIndex form)
+        {
+            bool status = true;
+            bool check = true;
+            string msg = "";
+
+            if (string.IsNullOrEmpty(form.code))
+            {
+                check = false;
+            }
+
+            if (check)
+            {
+                status = reportModel.UpdateStockIndex(form);
+                msg = status ? "更新成功!" : "更新失敗!";
+            }
+            else
+            {
+                status = false;
+                msg = "資料輸入錯誤!";
+            }
+
+            return Json(new Results<DBNull>
+            {
+                Success = status,
+                Message = msg,
+                Data = null,
+                TotalCount = status ? 1 : 0
+            });
+        }
+
+        public JsonResult DeleteStockIndex(stockIndex form)
+        {
+            bool check = true;
+            bool status = true;
+            string msg = "";
+
+            if (form.id == 0)
+            {
+                check = false;
+            }
+
+
+            if (check)
+            {
+                status = reportModel.DeleteStockIndex(form.id);
+                msg = status ? "刪除成功!" : "刪除失敗!";
+            }
+            else
+            {
+                status = false;
+                msg = "資料輸入錯誤!";
+            }
+
+            return Json(new Results<DBNull>
+            {
+                Success = status,
+                Message = msg,
+                Data = null,
+                TotalCount = status ? 1 : 0
+            });
+        }
+
         public JsonResult CreateStockFavorite(stockFavorite form)
         {
             bool status = true;
@@ -492,7 +616,10 @@ namespace WebStock.Controllers
             {
                 check = false;
             }
-
+            if (form.operId == 0)
+            {
+                check = false;
+            }
 
             if (check)
             {
@@ -514,7 +641,7 @@ namespace WebStock.Controllers
             });
         }
 
-        public JsonResult CreateStockInventory(stockProfit form)
+        public JsonResult CreateStockProfit(stockProfit form)
         {
             bool status = true;
             bool check = true;
@@ -556,7 +683,7 @@ namespace WebStock.Controllers
                 TotalCount = status ? 1 : 0
             });
         }
-        public JsonResult DeleteStockInventory(stockFavorite form)
+        public JsonResult DeleteStockProfit(stockFavorite form)
         {
             bool status = true;
             bool check = true;
@@ -620,7 +747,7 @@ namespace WebStock.Controllers
                     };
 
                     string JWTToken = EncodeJWTToken(payload);
-
+                    data = new UserInfo();
                     data.OperId = member.id;
                     data.OperAccount = member.account;
                     data.OperName = member.name;

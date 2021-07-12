@@ -3,14 +3,26 @@
 @{
     ViewBag.Title = "Login";
 }
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+<link rel="stylesheet" href="~/Content/Logincss/style.css"/>
 <h2>登入</h2>
-
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lem78gaAAAAAL8omzOhhSOklM55TALf0CgD4nYv"></script>
+    <script>
+        grecaptcha.ready(function () {
+            grecaptcha.execute('6Lem78gaAAAAAL8omzOhhSOklM55TALf0CgD4nYv', { action: 'homepage' }).then(function (token) {
+                document.getElementById("g-recaptcha-response").value = token;
+            });
+        });
+    </script>
+}
 
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
@@ -33,18 +45,26 @@
         </div>
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="登入" class="btn btn-success" /> <br /><br />
+                <input type="submit" value="登入" class="btn btn-success" />
                 @Html.ActionLink("註冊", "Register", new { }, new { @Class = "btn btn-primary" })
             </div>
         </div>
     </div>
+    <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response" />
 }
 
 <div>
-    @*@Html.ActionLink("回目錄", "Index", new { }, new { @Class = "btn btn-primary" })*@ 
-    
+    <div class="social-login">
+        <span class="social-label">Or login with</span>
+        <ul class="socials">
+            <li>
+                <a href="#" title="facebook"><i class="display-flex-center zmdi zmdi-facebook" onclick="FBlogin()"></i></a>
+            </li>
+            <li>
+                <a href="#" title="google"><i class="display-flex-center zmdi zmdi-google" id="google" onclick="GoogleLogin();"></i></a>
+            </li>
+        </ul>
+    </div>
+
 </div>
 
-@section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-}
