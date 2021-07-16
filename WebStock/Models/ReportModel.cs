@@ -920,7 +920,7 @@ namespace WebStock.Models
         {
             List<RSL> data = new List<RSL>();
             string datefrom = form.dataDate.ToString("yyyy-MM-dd");
-            string datenow = DateTime.Now.AddDays(1).ToString("yyyy-MM-dd");
+            string datenow = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
             using (var db = new WebStockEntities())
             {
                 string sql = @"SELECT

@@ -12,7 +12,7 @@ namespace WebStock.Models
             using(var db = new WebStockEntities())
             {
                 sysLog log = new sysLog();
-                log.date = DateTime.Now;
+                log.date = DateTime.UtcNow.AddHours(08);
                 log.type = type;
                 log.message = message;
                 db.sysLog.Add(log);
