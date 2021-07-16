@@ -254,7 +254,7 @@ namespace WebStock.Controllers
                 DateTime date = sysModel.getsysConfigstockUpdate();
 
                 int count = 0;
-                while (date <= DateTime.Now)
+                while (date <= DateTime.UtcNow.AddHours(08))
                 {
                     string datetime = date.ToString("yyyy-MM-dd");
                     string s = await downloadModel.DownloadStock(datetime);
@@ -264,6 +264,8 @@ namespace WebStock.Controllers
                     date = nextdate;
                     Thread.Sleep(5000);
                 }
+                date = DateTime.UtcNow.AddHours(08);
+                count = sysModel.updatesysConfigstockUpdate(date);
                 status = true;
             }
             catch (Exception e)
@@ -293,7 +295,7 @@ namespace WebStock.Controllers
                 DateTime date = sysModel.getsysConfigotcUpdate();
 
                 int count = 0;
-                while (date <= DateTime.Now)
+                while (date <= DateTime.UtcNow.AddHours(08))
                 {
                     DateTime taiwandatetime = date.AddYears(-1911);
                     string datetime = taiwandatetime.ToString("yyyy/MM/dd");
@@ -304,6 +306,9 @@ namespace WebStock.Controllers
                     date = nextdate;
                     Thread.Sleep(5000);
                 }
+                date = DateTime.UtcNow.AddHours(08);
+                count = sysModel.updatesysConfigotcUpdate(date);
+                status = true;
             }
             catch (Exception e)
             {
@@ -796,7 +801,7 @@ namespace WebStock.Controllers
             {
                 string s = loginModel.Register(form);
                 status = s != "02" ? true : false;
-                msg = s != "02" ? s != "03" ? "新增成功!" : "無須新增!" : "新增失敗!";
+                msg = s != "02" ? s != "03" ? "註冊成功!" : "此帳號已有人註冊!" : "註冊失敗!";
             }
             else
             {
