@@ -95,7 +95,7 @@ namespace WebStock.Models
 
         public class stockStatistics : stockAvg
         {
-            public string dateYear { get; set; }
+            public int dataYear { get; set; }
         }
 
         public class stockNowStatistics : stockNow

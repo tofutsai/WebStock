@@ -688,7 +688,7 @@ namespace WebStock.Controllers
                 TotalCount = status ? 1 : 0
             });
         }
-        public JsonResult DeleteStockProfit(stockFavorite form)
+        public JsonResult DeleteStockProfit(stockProfit form)
         {
             bool status = true;
             bool check = true;

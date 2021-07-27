@@ -704,7 +704,7 @@ namespace WebStock.Models
                         double fiveYearsAvglowestPrice = 0;
                         int fiveYearsAvgShares = 0;
                         double fiveYearsAvgTurnOver = 0;
-                        var singleCodeStock = stockStatistics.Where(x => x.code == item.code);
+                        var singleCodeStock = stockStatistics.Where(x => x.code == item.code).AsEnumerable();
                         if (singleCodeStock.Count() == 0)
                             continue;
                         foreach (var data in singleCodeStock)
