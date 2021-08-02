@@ -122,7 +122,15 @@ namespace WebStock.ViewModels
         public class RSL : sysLog 
         {
             public int totalCount { get; set; }
-        } 
+        }
+        
+        public class EditPas
+        {
+            public int OperId { get; set; }
+            public string oldPassword { get; set; }
+            public string newPassword { get; set; }
+            public string newPasswordCheck { get; set; }
+        }
     }
 
     

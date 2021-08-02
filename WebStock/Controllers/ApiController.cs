@@ -817,5 +817,44 @@ namespace WebStock.Controllers
                 TotalCount = status ? 1 : 0
             });
         }
+
+        [HttpPost]
+        public JsonResult EditPassword(EditPas editPas)
+        {
+            bool status = true;
+            bool check = true;
+            string msg = "";
+            if (string.IsNullOrEmpty(editPas.oldPassword))
+            {
+                check = false;
+            }
+            if (string.IsNullOrEmpty(editPas.newPassword))
+            {
+                check = false;
+            }
+            if (string.IsNullOrEmpty(editPas.newPasswordCheck))
+            {
+                check = false;
+            }
+            if(editPas.newPassword != editPas.newPasswordCheck)
+            {
+                check = false;
+                status = false;
+                msg = "新密碼不一致，請重新輸入";
+            }
+            if (check)
+            {
+                string s = loginModel.EditPassword(editPas);
+                status = s != "02" && s != "03" ? true : false;
+                msg = s != "02" ? s != "03" ? "密碼修改成功!" : "舊密碼輸入錯誤!" : "密碼修改失敗!";
+            }
+            return Json(new Results<DBNull>
+            {
+                Success = status,
+                Message = msg,
+                Data = null,
+                TotalCount = status ? 1 : 0
+            });
+        }
     }
 }
