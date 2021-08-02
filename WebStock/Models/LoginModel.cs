@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
+using static WebStock.ViewModels.ReportViewModel;
 
 namespace WebStock.Models
 {
@@ -71,6 +72,23 @@ namespace WebStock.Models
                 new HttpCookie(FormsAuthentication.FormsCookieName, encTicket));
 
             return true;
+        }
+
+        internal string EditPassword(EditPas editPas)
+        {
+            string oldPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(editPas.oldPassword, "SHA1");
+            var check = db.member.Where(m => m.id == editPas.OperId && m.password == oldPassword).FirstOrDefault();
+            if(check != null)
+            {
+                string strPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(editPas.newPassword, "SHA1");
+                check.password = strPassword;
+                int r = db.SaveChanges();
+                return r > 0 ? "01" : "02";
+            }
+            else
+            {
+                return "03";
+            }
         }
 
         internal bool Logout()
